@@ -50,10 +50,18 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'app_user', targetEntity: Investors::class)]
     private Collection $investors;
 
+    #[ORM\OneToMany(mappedBy: 'app_user_send', targetEntity: Contacts::class, orphanRemoval: true)]
+    private Collection $contacts_send;
+
+    #[ORM\OneToMany(mappedBy: 'app_user_recive', targetEntity: Contacts::class, orphanRemoval: true)]
+    private Collection $contacts_recive;
+
     public function __construct()
     {
         $this->researchCenters = new ArrayCollection();
         $this->investors = new ArrayCollection();
+        $this->contacts_send = new ArrayCollection();
+        $this->contacts_recive = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -234,6 +242,66 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($investor->getAppUser() === $this) {
                 $investor->setAppUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Contacts>
+     */
+    public function getContactsSend(): Collection
+    {
+        return $this->contacts_send;
+    }
+
+    public function addContactsSend(Contacts $contactsSend): static
+    {
+        if (!$this->contacts_send->contains($contactsSend)) {
+            $this->contacts_send->add($contactsSend);
+            $contactsSend->setAppUserSend($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContactsSend(Contacts $contactsSend): static
+    {
+        if ($this->contacts_send->removeElement($contactsSend)) {
+            // set the owning side to null (unless already changed)
+            if ($contactsSend->getAppUserSend() === $this) {
+                $contactsSend->setAppUserSend(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Contacts>
+     */
+    public function getContactsRecive(): Collection
+    {
+        return $this->contacts_recive;
+    }
+
+    public function addContactsRecive(Contacts $contactsRecive): static
+    {
+        if (!$this->contacts_recive->contains($contactsRecive)) {
+            $this->contacts_recive->add($contactsRecive);
+            $contactsRecive->setAppUserRecive($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContactsRecive(Contacts $contactsRecive): static
+    {
+        if ($this->contacts_recive->removeElement($contactsRecive)) {
+            // set the owning side to null (unless already changed)
+            if ($contactsRecive->getAppUserRecive() === $this) {
+                $contactsRecive->setAppUserRecive(null);
             }
         }
 
