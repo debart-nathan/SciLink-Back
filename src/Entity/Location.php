@@ -24,7 +24,7 @@ class Location
     #[ORM\Column(length: 255)]
     private ?string $commune = null;
 
-    #[ORM\OneToMany(mappedBy: 'located', targetEntity: ResearchCenter::class)]
+    #[ORM\OneToMany(mappedBy: 'located', targetEntity: ResearchCenters::class)]
     private Collection $researchCenters;
 
     public function __construct()
@@ -81,7 +81,7 @@ class Location
         return $this->researchCenters;
     }
 
-    public function addResearchCenter(ResearchCenter $researchCenter): static
+    public function addResearchCenter(ResearchCenters $researchCenter): static
     {
         if (!$this->researchCenters->contains($researchCenter)) {
             $this->researchCenters->add($researchCenter);
@@ -91,7 +91,7 @@ class Location
         return $this;
     }
 
-    public function removeResearchCenter(ResearchCenter $researchCenter): static
+    public function removeResearchCenter(ResearchCenters $researchCenter): static
     {
         if ($this->researchCenters->removeElement($researchCenter)) {
             // set the owning side to null (unless already changed)

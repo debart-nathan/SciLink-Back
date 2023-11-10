@@ -48,12 +48,16 @@ class ResearchCenters
     #[ORM\OneToMany(mappedBy: 'researchCenter', targetEntity: Tutelles::class, orphanRemoval: true)]
     private Collection $tutelles;
 
+    #[ORM\ManyToMany(targetEntity: Domaines::class, mappedBy: 'researchCenters')]
+    private Collection $domaines;
+
     public function __construct()
     {
         $this->parent = new ArrayCollection();
         $this->researchCenters = new ArrayCollection();
         $this->manages = new ArrayCollection();
         $this->tutelles = new ArrayCollection();
+        $this->domaines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -251,6 +255,33 @@ class ResearchCenters
             if ($tutelle->getResearchCenter() === $this) {
                 $tutelle->setResearchCenter(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Domaines>
+     */
+    public function getDomaines(): Collection
+    {
+        return $this->domaines;
+    }
+
+    public function addDomaine(Domaines $domaine): static
+    {
+        if (!$this->domaines->contains($domaine)) {
+            $this->domaines->add($domaine);
+            $domaine->addResearchCenter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDomaine(Domaines $domaine): static
+    {
+        if ($this->domaines->removeElement($domaine)) {
+            $domaine->removeResearchCenter($this);
         }
 
         return $this;
