@@ -42,10 +42,14 @@ class ResearchCenter
     #[ORM\ManyToOne(inversedBy: 'researchCenters')]
     private ?Location $located = null;
 
+    #[ORM\OneToMany(mappedBy: 'ResearchCenter', targetEntity: Manages::class, orphanRemoval: true)]
+    private Collection $manages;
+
     public function __construct()
     {
         $this->parent = new ArrayCollection();
         $this->researchCenters = new ArrayCollection();
+        $this->manages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -184,6 +188,36 @@ class ResearchCenter
     public function setLocated(?Location $located): static
     {
         $this->located = $located;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Manages>
+     */
+    public function getManages(): Collection
+    {
+        return $this->manages;
+    }
+
+    public function addManage(Manages $manage): static
+    {
+        if (!$this->manages->contains($manage)) {
+            $this->manages->add($manage);
+            $manage->setResearchCenter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeManage(Manages $manage): static
+    {
+        if ($this->manages->removeElement($manage)) {
+            // set the owning side to null (unless already changed)
+            if ($manage->getResearchCenter() === $this) {
+                $manage->setResearchCenter(null);
+            }
+        }
 
         return $this;
     }

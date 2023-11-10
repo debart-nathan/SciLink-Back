@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PersonnelsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PersonnelsRepository::class)]
@@ -18,6 +20,14 @@ class Personnels
 
     #[ORM\Column(length: 255)]
     private ?string $last_name = null;
+
+    #[ORM\OneToMany(mappedBy: 'personnel', targetEntity: Manages::class, orphanRemoval: true)]
+    private Collection $manages;
+
+    public function __construct()
+    {
+        $this->manages = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -44,6 +54,36 @@ class Personnels
     public function setLastName(string $last_name): static
     {
         $this->last_name = $last_name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Manages>
+     */
+    public function getManages(): Collection
+    {
+        return $this->manages;
+    }
+
+    public function addManage(Manages $manage): static
+    {
+        if (!$this->manages->contains($manage)) {
+            $this->manages->add($manage);
+            $manage->setPersonnel($this);
+        }
+
+        return $this;
+    }
+
+    public function removeManage(Manages $manage): static
+    {
+        if ($this->manages->removeElement($manage)) {
+            // set the owning side to null (unless already changed)
+            if ($manage->getPersonnel() === $this) {
+                $manage->setPersonnel(null);
+            }
+        }
 
         return $this;
     }
