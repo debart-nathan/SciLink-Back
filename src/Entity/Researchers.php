@@ -21,6 +21,9 @@ class Researchers
     #[ORM\OneToOne(mappedBy: 'researcher', cascade: ['persist', 'remove'])]
     private ?Users $app_user = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $descriptions = null;
+
     public function __construct()
     {
         $this->domains = new ArrayCollection();
@@ -73,6 +76,18 @@ class Researchers
         }
 
         $this->app_user = $app_user;
+
+        return $this;
+    }
+
+    public function getDescriptions(): ?string
+    {
+        return $this->descriptions;
+    }
+
+    public function setDescriptions(string $descriptions): static
+    {
+        $this->descriptions = $descriptions;
 
         return $this;
     }
