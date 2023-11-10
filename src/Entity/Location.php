@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LocationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LocationRepository::class)]
@@ -21,6 +23,14 @@ class Location
 
     #[ORM\Column(length: 255)]
     private ?string $commune = null;
+
+    #[ORM\OneToMany(mappedBy: 'located', targetEntity: ResearchCenter::class)]
+    private Collection $researchCenters;
+
+    public function __construct()
+    {
+        $this->researchCenters = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -59,6 +69,36 @@ class Location
     public function setCommune(string $commune): static
     {
         $this->commune = $commune;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResearchCenter>
+     */
+    public function getResearchCenters(): Collection
+    {
+        return $this->researchCenters;
+    }
+
+    public function addResearchCenter(ResearchCenter $researchCenter): static
+    {
+        if (!$this->researchCenters->contains($researchCenter)) {
+            $this->researchCenters->add($researchCenter);
+            $researchCenter->setLocated($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResearchCenter(ResearchCenter $researchCenter): static
+    {
+        if ($this->researchCenters->removeElement($researchCenter)) {
+            // set the owning side to null (unless already changed)
+            if ($researchCenter->getLocated() === $this) {
+                $researchCenter->setLocated(null);
+            }
+        }
 
         return $this;
     }
