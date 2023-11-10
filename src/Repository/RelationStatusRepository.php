@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Repository;
+
+use App\Entity\RelationStatus;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<RelationStatus>
+ *
+ * @method RelationStatus|null find($id, $lockMode = null, $lockVersion = null)
+ * @method RelationStatus|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RelationStatus[]    findAll()
+ * @method RelationStatus[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class RelationStatusRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, RelationStatus::class);
+    }
+
+//    /**
+//     * @return RelationStatus[] Returns an array of RelationStatus objects
+//     */
+//    public function findByExampleField($value): array
+//    {
+//        return $this->createQueryBuilder('r')
+//            ->andWhere('r.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->orderBy('r.id', 'ASC')
+//            ->setMaxResults(10)
+//            ->getQuery()
+//            ->getResult()
+//        ;
+//    }
+
+//    public function findOneBySomeField($value): ?RelationStatus
+//    {
+//        return $this->createQueryBuilder('r')
+//            ->andWhere('r.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->getQuery()
+//            ->getOneOrNullResult()
+//        ;
+//    }
+}
