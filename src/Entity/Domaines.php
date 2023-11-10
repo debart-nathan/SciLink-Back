@@ -21,9 +21,13 @@ class Domaines
     #[ORM\ManyToMany(targetEntity: ResearchCenters::class, inversedBy: 'domaines')]
     private Collection $researchCenters;
 
+    #[ORM\ManyToMany(targetEntity: Researchers::class, mappedBy: 'domaines')]
+    private Collection $researchers;
+
     public function __construct()
     {
         $this->researchCenters = new ArrayCollection();
+        $this->researchers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -63,6 +67,33 @@ class Domaines
     public function removeResearchCenter(ResearchCenters $researchCenter): static
     {
         $this->researchCenters->removeElement($researchCenter);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Researchers>
+     */
+    public function getResearchers(): Collection
+    {
+        return $this->researchers;
+    }
+
+    public function addResearcher(Researchers $researcher): static
+    {
+        if (!$this->researchers->contains($researcher)) {
+            $this->researchers->add($researcher);
+            $researcher->addDomaine($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResearcher(Researchers $researcher): static
+    {
+        if ($this->researchers->removeElement($researcher)) {
+            $researcher->removeDomaine($this);
+        }
 
         return $this;
     }
