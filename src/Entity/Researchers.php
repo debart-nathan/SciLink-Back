@@ -15,15 +15,15 @@ class Researchers
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToMany(targetEntity: Domaines::class, inversedBy: 'researchers')]
-    private Collection $domaines;
+    #[ORM\ManyToMany(targetEntity: Domains::class, inversedBy: 'researchers')]
+    private Collection $domains;
 
     #[ORM\OneToOne(mappedBy: 'researcher', cascade: ['persist', 'remove'])]
     private ?Users $app_user = null;
 
     public function __construct()
     {
-        $this->domaines = new ArrayCollection();
+        $this->domains = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -36,21 +36,21 @@ class Researchers
      */
     public function getDomaines(): Collection
     {
-        return $this->domaines;
+        return $this->domains;
     }
 
-    public function addDomaine(Domaines $domaine): static
+    public function addDomaine(Domains $domain): static
     {
-        if (!$this->domaines->contains($domaine)) {
-            $this->domaines->add($domaine);
+        if (!$this->domains->contains($domain)) {
+            $this->domains->add($domain);
         }
 
         return $this;
     }
 
-    public function removeDomaine(Domaines $domaine): static
+    public function removeDomaine(Domains $domain): static
     {
-        $this->domaines->removeElement($domaine);
+        $this->domains->removeElement($domain);
 
         return $this;
     }

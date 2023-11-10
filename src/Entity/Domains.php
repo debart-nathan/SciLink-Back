@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\DomainesRepository;
+use App\Repository\DomainsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: DomainesRepository::class)]
-class Domaines
+#[ORM\Entity(repositoryClass: DomainsRepository::class)]
+class Domains
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

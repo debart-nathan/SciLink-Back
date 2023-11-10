@@ -16,7 +16,7 @@ class ResearchCenters
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $libele = null;
+    private ?string $libelle = null;
 
     #[ORM\Column(length: 255)]
     private ?string $sigle = null;
@@ -48,8 +48,8 @@ class ResearchCenters
     #[ORM\OneToMany(mappedBy: 'researchCenter', targetEntity: Tutelles::class, orphanRemoval: true)]
     private Collection $tutelles;
 
-    #[ORM\ManyToMany(targetEntity: Domaines::class, mappedBy: 'researchCenters')]
-    private Collection $domaines;
+    #[ORM\ManyToMany(targetEntity: Domains::class, mappedBy: 'researchCenters')]
+    private Collection $domains;
 
     #[ORM\ManyToMany(targetEntity: Users::class, mappedBy: 'researchCenters')]
     private Collection $users;
@@ -60,7 +60,7 @@ class ResearchCenters
         $this->researchCenters = new ArrayCollection();
         $this->manages = new ArrayCollection();
         $this->tutelles = new ArrayCollection();
-        $this->domaines = new ArrayCollection();
+        $this->domains = new ArrayCollection();
         $this->users = new ArrayCollection();
     }
 
@@ -69,14 +69,14 @@ class ResearchCenters
         return $this->id;
     }
 
-    public function getLibele(): ?string
+    public function getLibelle(): ?string
     {
-        return $this->libele;
+        return $this->libelle;
     }
 
-    public function setLibele(string $libele): static
+    public function setLibelle(string $libelle): static
     {
-        $this->libele = $libele;
+        $this->libelle = $libelle;
 
         return $this;
     }
@@ -265,27 +265,27 @@ class ResearchCenters
     }
 
     /**
-     * @return Collection<int, Domaines>
+     * @return Collection<int, Domains>
      */
-    public function getDomaines(): Collection
+    public function getDomains(): Collection
     {
-        return $this->domaines;
+        return $this->domains;
     }
 
-    public function addDomaine(Domaines $domaine): static
+    public function addDomain(Domains $domain): static
     {
-        if (!$this->domaines->contains($domaine)) {
-            $this->domaines->add($domaine);
-            $domaine->addResearchCenter($this);
+        if (!$this->domains->contains($domain)) {
+            $this->domains->add($domain);
+            $domain->addResearchCenter($this);
         }
 
         return $this;
     }
 
-    public function removeDomaine(Domaines $domaine): static
+    public function removeDomain(Domains $domain): static
     {
-        if ($this->domaines->removeElement($domaine)) {
-            $domaine->removeResearchCenter($this);
+        if ($this->domains->removeElement($domain)) {
+            $domain->removeResearchCenter($this);
         }
 
         return $this;
