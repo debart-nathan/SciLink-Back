@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\LocationRepository;
+use App\Repository\LocationsRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: LocationRepository::class)]
-class Location
+#[ORM\Entity(repositoryClass: LocationsRepository::class)]
+class Locations
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,9 +27,13 @@ class Location
     #[ORM\OneToMany(mappedBy: 'located', targetEntity: ResearchCenters::class)]
     private Collection $researchCenters;
 
+    #[ORM\OneToMany(mappedBy: 'location', targetEntity: Users::class)]
+    private Collection $users;
+
     public function __construct()
     {
         $this->researchCenters = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -97,6 +101,36 @@ class Location
             // set the owning side to null (unless already changed)
             if ($researchCenter->getLocated() === $this) {
                 $researchCenter->setLocated(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Users>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(Users $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->setLocation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(Users $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getLocation() === $this) {
+                $user->setLocation(null);
             }
         }
 

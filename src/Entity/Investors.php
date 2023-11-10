@@ -30,6 +30,9 @@ class Investors
     #[ORM\OneToMany(mappedBy: 'investor', targetEntity: Tutelles::class)]
     private Collection $tutelles;
 
+    #[ORM\ManyToOne(inversedBy: 'investors')]
+    private ?Users $app_user = null;
+
     public function __construct()
     {
         $this->tutelles = new ArrayCollection();
@@ -114,6 +117,18 @@ class Investors
                 $tutelle->setInvestor(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAppUser(): ?Users
+    {
+        return $this->app_user;
+    }
+
+    public function setAppUser(?Users $app_user): static
+    {
+        $this->app_user = $app_user;
 
         return $this;
     }

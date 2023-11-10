@@ -40,7 +40,7 @@ class ResearchCenters
     private Collection $researchCenters;
 
     #[ORM\ManyToOne(inversedBy: 'researchCenters')]
-    private ?Location $located = null;
+    private ?Locations $located = null;
 
     #[ORM\OneToMany(mappedBy: 'ResearchCenters', targetEntity: Manages::class, orphanRemoval: true)]
     private Collection $manages;
@@ -51,6 +51,9 @@ class ResearchCenters
     #[ORM\ManyToMany(targetEntity: Domaines::class, mappedBy: 'researchCenters')]
     private Collection $domaines;
 
+    #[ORM\ManyToMany(targetEntity: Users::class, mappedBy: 'researchCenters')]
+    private Collection $users;
+
     public function __construct()
     {
         $this->parent = new ArrayCollection();
@@ -58,6 +61,7 @@ class ResearchCenters
         $this->manages = new ArrayCollection();
         $this->tutelles = new ArrayCollection();
         $this->domaines = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -188,12 +192,12 @@ class ResearchCenters
         return $this;
     }
 
-    public function getLocated(): ?Location
+    public function getLocated(): ?Locations
     {
         return $this->located;
     }
 
-    public function setLocated(?Location $located): static
+    public function setLocated(?Locations $located): static
     {
         $this->located = $located;
 
@@ -282,6 +286,33 @@ class ResearchCenters
     {
         if ($this->domaines->removeElement($domaine)) {
             $domaine->removeResearchCenter($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Users>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(Users $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addResearchCenter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(Users $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeResearchCenter($this);
         }
 
         return $this;

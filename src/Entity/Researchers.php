@@ -18,6 +18,9 @@ class Researchers
     #[ORM\ManyToMany(targetEntity: Domaines::class, inversedBy: 'researchers')]
     private Collection $domaines;
 
+    #[ORM\OneToOne(mappedBy: 'researcher', cascade: ['persist', 'remove'])]
+    private ?Users $app_user = null;
+
     public function __construct()
     {
         $this->domaines = new ArrayCollection();
@@ -48,6 +51,28 @@ class Researchers
     public function removeDomaine(Domaines $domaine): static
     {
         $this->domaines->removeElement($domaine);
+
+        return $this;
+    }
+
+    public function getUser(): ?Users
+    {
+        return $this->app_user;
+    }
+
+    public function setUser(?Users $app_user): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($app_user === null && $this->app_user !== null) {
+            $this->app_user->setResearcher(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($app_user !== null && $app_user->getResearcher() !== $this) {
+            $app_user->setResearcher($this);
+        }
+
+        $this->app_user = $app_user;
 
         return $this;
     }
