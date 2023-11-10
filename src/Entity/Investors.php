@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\InvestorsRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: InvestorsRepository::class)]
@@ -24,6 +26,14 @@ class Investors
 
     #[ORM\Column(length: 255)]
     private ?string $label = null;
+
+    #[ORM\OneToMany(mappedBy: 'investor', targetEntity: Tutelles::class)]
+    private Collection $tutelles;
+
+    public function __construct()
+    {
+        $this->tutelles = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -74,6 +84,36 @@ class Investors
     public function setLabel(string $label): static
     {
         $this->label = $label;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tutelles>
+     */
+    public function getTutelles(): Collection
+    {
+        return $this->tutelles;
+    }
+
+    public function addTutelle(Tutelles $tutelle): static
+    {
+        if (!$this->tutelles->contains($tutelle)) {
+            $this->tutelles->add($tutelle);
+            $tutelle->setInvestor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTutelle(Tutelles $tutelle): static
+    {
+        if ($this->tutelles->removeElement($tutelle)) {
+            // set the owning side to null (unless already changed)
+            if ($tutelle->getInvestor() === $this) {
+                $tutelle->setInvestor(null);
+            }
+        }
 
         return $this;
     }

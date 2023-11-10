@@ -2,27 +2,27 @@
 
 namespace App\Repository;
 
-use App\Entity\ResearchCenter;
+use App\Entity\ResearchCenters;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ResearchCenter>
+ * @extends ServiceEntityRepository<ResearchCenters>
  *
- * @method ResearchCenter|null find($id, $lockMode = null, $lockVersion = null)
- * @method ResearchCenter|null findOneBy(array $criteria, array $orderBy = null)
- * @method ResearchCenter[]    findAll()
- * @method ResearchCenter[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method ResearchCenters|null find($id, $lockMode = null, $lockVersion = null)
+ * @method ResearchCenters|null findOneBy(array $criteria, array $orderBy = null)
+ * @method ResearchCenters[]    findAll()
+ * @method ResearchCenters[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ResearchCenterRepository extends ServiceEntityRepository
+class ResearchCentersRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, ResearchCenter::class);
+        parent::__construct($registry, ResearchCenters::class);
     }
 
 //    /**
-//     * @return ResearchCenter[] Returns an array of ResearchCenter objects
+//     * @return ResearchCenters[] Returns an array of ResearchCenters objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +36,7 @@ class ResearchCenterRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?ResearchCenter
+//    public function findOneBySomeField($value): ?ResearchCenters
 //    {
 //        return $this->createQueryBuilder('r')
 //            ->andWhere('r.exampleField = :val')

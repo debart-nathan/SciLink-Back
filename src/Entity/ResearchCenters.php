@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ResearchCenterRepository::class)]
-class ResearchCenter
+class ResearchCenters
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -42,14 +42,18 @@ class ResearchCenter
     #[ORM\ManyToOne(inversedBy: 'researchCenters')]
     private ?Location $located = null;
 
-    #[ORM\OneToMany(mappedBy: 'ResearchCenter', targetEntity: Manages::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'ResearchCenters', targetEntity: Manages::class, orphanRemoval: true)]
     private Collection $manages;
+
+    #[ORM\OneToMany(mappedBy: 'researchCenter', targetEntity: Tutelles::class, orphanRemoval: true)]
+    private Collection $tutelles;
 
     public function __construct()
     {
         $this->parent = new ArrayCollection();
         $this->researchCenters = new ArrayCollection();
         $this->manages = new ArrayCollection();
+        $this->tutelles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -216,6 +220,36 @@ class ResearchCenter
             // set the owning side to null (unless already changed)
             if ($manage->getResearchCenter() === $this) {
                 $manage->setResearchCenter(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Tutelles>
+     */
+    public function getTutelles(): Collection
+    {
+        return $this->tutelles;
+    }
+
+    public function addTutelle(Tutelles $tutelle): static
+    {
+        if (!$this->tutelles->contains($tutelle)) {
+            $this->tutelles->add($tutelle);
+            $tutelle->setResearchCenter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTutelle(Tutelles $tutelle): static
+    {
+        if ($this->tutelles->removeElement($tutelle)) {
+            // set the owning side to null (unless already changed)
+            if ($tutelle->getResearchCenter() === $this) {
+                $tutelle->setResearchCenter(null);
             }
         }
 

@@ -22,7 +22,7 @@ class Manages
 
     #[ORM\ManyToOne(inversedBy: 'manages')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?ResearchCenter $researchCenter = null;
+    private ?ResearchCenters $researchCenter = null;
 
     public function getId(): ?int
     {
@@ -53,12 +53,12 @@ class Manages
         return $this;
     }
 
-    public function getResearchCenter(): ?ResearchCenter
+    public function getResearchCenter(): ?ResearchCenters
     {
         return $this->researchCenter;
     }
 
-    public function setResearchCenter(?ResearchCenter $researchCenter): static
+    public function setResearchCenter(?ResearchCenters $researchCenter): static
     {
         $this->researchCenter = $researchCenter;
 
