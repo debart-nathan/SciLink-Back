@@ -18,10 +18,10 @@ class Domains
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\ManyToMany(targetEntity: ResearchCenters::class, inversedBy: 'domaines')]
+    #[ORM\ManyToMany(targetEntity: ResearchCenters::class, inversedBy: 'domains')]
     private Collection $researchCenters;
 
-    #[ORM\ManyToMany(targetEntity: Researchers::class, mappedBy: 'domaines')]
+    #[ORM\ManyToMany(targetEntity: Researchers::class, mappedBy: 'domains')]
     private Collection $researchers;
 
     public function __construct()

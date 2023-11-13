@@ -21,28 +21,62 @@ class ResearchCentersRepository extends ServiceEntityRepository
         parent::__construct($registry, ResearchCenters::class);
     }
 
-//    /**
-//     * @return ResearchCenters[] Returns an array of ResearchCenters objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('r.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function search($search, $additionalData)
+    {
+        $queryBuilder = $this->createQueryBuilder('rc');
 
-//    public function findOneBySomeField($value): ?ResearchCenters
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if (!empty($search)) {
+            $queryBuilder->andWhere('LOWER(rc.libelle) LIKE :search OR LOWER(rc.sigle) LIKE :search')
+                ->setParameter('search', '%' . strtolower($search) . '%');
+        }
+
+        if (!empty($additionalData['is_active'])) {
+            $queryBuilder->andWhere('rc.is_active = :isActive')
+                ->setParameter('isActive', $additionalData['is_active']);
+        }
+
+        if (!empty($additionalData['domain'])) {
+            $queryBuilder->innerJoin('rc.domains', 'd')
+                ->andWhere('d.id = :domainId')
+                ->setParameter('domainId', $additionalData['domain']);
+        }
+
+
+        if (!empty($additionalData['date_start'])) {
+            $queryBuilder->andWhere('rc.founding_year >= :dateStart')
+                ->setParameter('dateStart', $additionalData['date_start']);
+        }
+
+        if (!empty($additionalData['date_end'])) {
+            $queryBuilder->andWhere('rc.founding_year <= :dateEnd')
+                ->setParameter('dateEnd', $additionalData['date_end']);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+    //    /**
+    //     * @return ResearchCenters[] Returns an array of ResearchCenters objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('r')
+    //            ->andWhere('r.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('r.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?ResearchCenters
+    //    {
+    //        return $this->createQueryBuilder('r')
+    //            ->andWhere('r.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }

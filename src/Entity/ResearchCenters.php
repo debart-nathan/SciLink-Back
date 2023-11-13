@@ -42,8 +42,8 @@ class ResearchCenters
     #[ORM\ManyToOne(inversedBy: 'researchCenters')]
     private ?Locations $located = null;
 
-    #[ORM\OneToMany(mappedBy: 'ResearchCenters', targetEntity: Manages::class, orphanRemoval: true)]
-    private Collection $manages;
+    #[ORM\OneToMany(mappedBy: 'researchCenter', targetEntity: Manages::class, orphanRemoval: true)]
+private Collection $manages;
 
     #[ORM\OneToMany(mappedBy: 'researchCenter', targetEntity: Tutelles::class, orphanRemoval: true)]
     private Collection $tutelles;

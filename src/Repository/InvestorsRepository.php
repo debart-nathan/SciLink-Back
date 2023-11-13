@@ -21,28 +21,48 @@ class InvestorsRepository extends ServiceEntityRepository
         parent::__construct($registry, Investors::class);
     }
 
-//    /**
-//     * @return Investors[] Returns an array of Investors objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('i')
-//            ->andWhere('i.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('i.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
 
-//    public function findOneBySomeField($value): ?Investors
-//    {
-//        return $this->createQueryBuilder('i')
-//            ->andWhere('i.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function search($search, $additionalData)
+    {
+        $qb = $this->createQueryBuilder('i');
+
+        $qb->where($qb->expr()->orX(
+            $qb->expr()->like('LOWER(i.name)', ':search'),
+            $qb->expr()->like('LOWER(i.sigle)', ':search')
+        ))
+            ->setParameter('search', '%' . strtolower($search) . '%');
+        /* TODO Choisir si on veut domaine ou pas
+        if (!empty($additionalData['domain'])) {
+            $qb->join('i.domains', 'd')
+                ->andWhere('d.id = :domainId')
+                ->setParameter('domainId', $additionalData['domain']);
+        }
+        */
+        return $qb->getQuery()->getResult();
+    }
+
+    //    /**
+    //     * @return Investors[] Returns an array of Investors objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('i')
+    //            ->andWhere('i.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('i.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?Investors
+    //    {
+    //        return $this->createQueryBuilder('i')
+    //            ->andWhere('i.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }
