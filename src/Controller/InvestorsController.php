@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Investors;
 use App\Repository\InvestorsRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,7 +56,7 @@ class InvestorsController extends AbstractController
     }
 
     #[Route('/Investors/{id}', name: 'app_investors_update', methods: ['PATCH'])]
-    public function update(InvestorsRepository $investorRepository, Investors $investor, Request $request): JsonResponse
+    public function update(InvestorsRepository $investorRepository, Investors $investor, Request $request,EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -72,7 +73,19 @@ class InvestorsController extends AbstractController
             $investor->setLabel($data['label']);
         }
 
-        $investorRepository->save($investor, true);
-        return new JsonResponse($investor, 200, [], true);
+        $entityManager->persist($investor);
+        $entityManager->flush();
+
+        $user_id = $investor->getAppUser() ? $investor->getAppUser()->getId() : null;
+        $investorArray = [
+            'id' => $investor->getId(),
+            'name' => $investor->getName(),
+            'sigle' => $investor->getSigle(),
+            'type' => $investor->getType(),
+            'label' => $investor->getLabel(),
+            'user_id' => $user_id,
+        ];
+        $investorJson = json_encode($investorArray);
+        return new JsonResponse($investorJson, 200, [], true);
     }
 }

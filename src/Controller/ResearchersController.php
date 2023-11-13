@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ResearchersController extends AbstractController
 {
@@ -49,15 +50,25 @@ class ResearchersController extends AbstractController
     }
 
     #[Route('/Researchers/{id}', name: 'app_researchers_update', methods: ['PATCH'])]
-    public function update(ResearchersRepository $researcherRepository, Researchers $researcher, Request $request): JsonResponse
+    public function update(ResearchersRepository $researcherRepository, Researchers $researcher, Request $request,EntityManagerInterface $entityManager): JsonResponse
     {
+        //return new JsonResponse($request->getContent());
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['descriptions'])) {
             $researcher->setDescriptions($data['descriptions']);
         }
 
-        $researcherRepository->save($researcher, true);
-        return new JsonResponse($researcher, 200, [], true);
+        $entityManager->persist($researcher);
+        $entityManager->flush();
+
+        $user_id = $researcher->getUser() ? $researcher->getUser()->getId() : null;
+        $researcherArray = [
+            'id' => $researcher->getId(),
+            'descriptions' => $researcher->getDescriptions(),
+            'user_id' => $user_id,
+        ];
+        $researcherJson = json_encode($researcherArray);
+        return new JsonResponse($researcherJson, 200, [], true);
     }
 }
