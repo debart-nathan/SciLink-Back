@@ -14,7 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Tutelles[]    findAll()
  * @method Tutelles[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TutelesRepository extends ServiceEntityRepository
+class TutellesRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

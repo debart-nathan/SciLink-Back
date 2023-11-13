@@ -21,28 +21,47 @@ class ResearchersRepository extends ServiceEntityRepository
         parent::__construct($registry, Researchers::class);
     }
 
-//    /**
-//     * @return Researchers[] Returns an array of Researchers objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('r.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function search($search, $additionalData)
+    {
+        $queryBuilder = $this->createQueryBuilder('r');
+        if ($search) {
+            $queryBuilder->join('r.app_user', 'u')
+                ->where('LOWER(u.user_name) LIKE :search')
+                ->orWhere('LOWER(u.first_name) LIKE :search')
+                ->orWhere('LOWER(u.last_name) LIKE :search')
+                ->setParameter('search', '%' . strtolower($search) . '%');
+        }
 
-//    public function findOneBySomeField($value): ?Researchers
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if (!empty($additionalData['domain'])) {
+            $queryBuilder->innerJoin('r.domains', 'd')
+                ->andWhere('d.id = :domainId')
+                ->setParameter('domainId', $additionalData['domain']);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+    //    /**
+    //     * @return Researchers[] Returns an array of Researchers objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('r')
+    //            ->andWhere('r.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('r.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?Researchers
+    //    {
+    //        return $this->createQueryBuilder('r')
+    //            ->andWhere('r.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }
