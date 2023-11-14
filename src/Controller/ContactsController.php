@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ContactsController extends AbstractController
 {
-    #[Route('/contacts', name: 'app_contacts', methods: ['GET'])]
+    #[Route('/Contacts', name: 'app_contacts', methods: ['GET'])]
     public function index(ContactsRepository $contactsRepository, Request $request): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
@@ -38,7 +38,7 @@ class ContactsController extends AbstractController
         return new JsonResponse($contactsJson, 200, [], true);
     }
 
-    #[Route('/contacts/{id}', name: 'app_contacts_show', methods: ['GET'])]
+    #[Route('/Contacts/{id}', name: 'app_contacts_show', methods: ['GET'])]
     public function show(ContactsRepository $contactRepository, Contacts $contact): JsonResponse
     {
         $contactArray = [
@@ -53,7 +53,7 @@ class ContactsController extends AbstractController
         return new JsonResponse($contactJson, 200, [], true);
     }
 
-    #[Route('/contacts/{id}', name: 'app_contacts_update', methods: ['PATCH'])]
+    #[Route('/Contacts/{id}', name: 'app_contacts_update', methods: ['PATCH'])]
     public function update(ContactsRepository $contactRepository, Contacts $contact, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

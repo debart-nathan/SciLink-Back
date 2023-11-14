@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TutellesController extends AbstractController
 {
-    #[Route('/tutelles', name: 'app_tutelles', methods: ['GET'])]
+    #[Route('/Tutelles', name: 'app_tutelles', methods: ['GET'])]
     public function index(TutellesRepository $tutellesRepository, Request $request): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
@@ -25,7 +25,7 @@ class TutellesController extends AbstractController
         }
         $tutellesArray = [];
         foreach ($tutelles as $tutelle) {
-            
+
             $tutellesArray[] = [
                 'id' => $tutelle->getId(),
                 'uai' => $tutelle->getUai(),
@@ -39,10 +39,10 @@ class TutellesController extends AbstractController
         return new JsonResponse($tutellesJson, 200, [], true);
     }
 
-    #[Route('/tutelles/{id}', name: 'app_tutelles_show', methods: ['GET'])]
+    #[Route('/Tutelles/{id}', name: 'app_tutelles_show', methods: ['GET'])]
     public function show(TutellesRepository $tutelleRepository, Tutelles $tutelle): JsonResponse
     {
-        
+
         $tutelleArray = [
             'id' => $tutelle->getId(),
             'uai' => $tutelle->getUai(),
@@ -50,13 +50,13 @@ class TutellesController extends AbstractController
             'type' => $tutelle->getType(),
             'investor' => $tutelle->getInvestor()->getId(),
             'researchCenter' => $tutelle->getResearchCenter()->getId(),
-            
+
         ];
         $tutelleJson = json_encode($tutelleArray);
         return new JsonResponse($tutelleJson, 200, [], true);
     }
 
-    #[Route('/tutelles/{id}', name: 'app_tutelles_update', methods: ['PATCH'])]
+    #[Route('/Tutelles/{id}', name: 'app_tutelles_update', methods: ['PATCH'])]
     public function update(TutellesRepository $tutelleRepository, Tutelles $tutelle, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -80,7 +80,7 @@ class TutellesController extends AbstractController
         $entityManager->persist($tutelle);
         $entityManager->flush();
 
-        
+
         $tutelleArray = [
             'id' => $tutelle->getId(),
             'uai' => $tutelle->getUai(),
@@ -88,7 +88,7 @@ class TutellesController extends AbstractController
             'type' => $tutelle->getType(),
             'investor' => $tutelle->getInvestor()->getId(),
             'researchCenter' => $tutelle->getResearchCenter()->getId(),
-            
+
         ];
         $tutelleJson = json_encode($tutelleArray);
         return new JsonResponse($tutelleJson, 200, [], true);

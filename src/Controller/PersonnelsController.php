@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class PersonnelsController extends AbstractController
 {
-    #[Route('/personnels', name: 'app_personnels', methods: ['GET'])]
+    #[Route('/Personnels', name: 'app_personnels', methods: ['GET'])]
     public function index(PersonnelsRepository $personnelsRepository, Request $request): JsonResponse
     {
         if ($request->query->count() > 0) {
@@ -34,7 +34,7 @@ class PersonnelsController extends AbstractController
         return new JsonResponse($personnelsJson, 200, [], true);
     }
 
-    #[Route('/personnels/{id}', name: 'app_personnels_show', methods: ['GET'])]
+    #[Route('/Personnels/{id}', name: 'app_personnels_show', methods: ['GET'])]
     public function show(PersonnelsRepository $personnelRepository, Personnels $personnel): JsonResponse
     {
         $personnelArray = [
@@ -47,7 +47,7 @@ class PersonnelsController extends AbstractController
         return new JsonResponse($personnelJson, 200, [], true);
     }
 
-    #[Route('/personnels/{id}', name: 'app_personnels_update', methods: ['PATCH'])]
+    #[Route('/Personnels/{id}', name: 'app_personnels_update', methods: ['PATCH'])]
     public function update(PersonnelsRepository $personnelRepository, Personnels $personnel, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
