@@ -26,7 +26,7 @@ class Contacts
 
     #[ORM\ManyToOne(inversedBy: 'contacts_recive')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Users $app_user_receive = null;
+    private ?Users $app_user_recive = null;
 
     #[ORM\ManyToOne(inversedBy: 'contacts')]
     private ?RelationStatus $relationStatus = null;
@@ -72,14 +72,14 @@ class Contacts
         return $this;
     }
 
-    public function getAppUserReceive(): ?Users
+    public function getAppUserRecive(): ?Users
     {
-        return $this->app_user_receive;
+        return $this->app_user_recive;
     }
 
-    public function setAppUserReceive(?Users $app_user_receive): static
+    public function setAppUserRecive(?Users $app_user_recive): static
     {
-        $this->app_user_receive = $app_user_receive;
+        $this->app_user_recive = $app_user_recive;
 
         return $this;
     }
