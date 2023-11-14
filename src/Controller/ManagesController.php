@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ManagesController extends AbstractController
 {
-    #[Route('/manages', name: 'app_manages', methods: ['GET'])]
+    #[Route('/Manages', name: 'app_manages', methods: ['GET'])]
     public function index(ManagesRepository $managesRepository, Request $request): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
@@ -36,7 +36,7 @@ class ManagesController extends AbstractController
         return new JsonResponse($managesJson, 200, [], true);
     }
 
-    #[Route('/manages/{id}', name: 'app_manages_show', methods: ['GET'])]
+    #[Route('/Manages/{id}', name: 'app_manages_show', methods: ['GET'])]
     public function show(ManagesRepository $manageRepository, Manages $manage): JsonResponse
     {
         $manageArray = [
@@ -49,7 +49,7 @@ class ManagesController extends AbstractController
         return new JsonResponse($manageJson, 200, [], true);
     }
 
-    #[Route('/manages/{id}', name: 'app_manages_update', methods: ['PATCH'])]
+    #[Route('/Manages/{id}', name: 'app_manages_update', methods: ['PATCH'])]
     public function update(ManagesRepository $manageRepository, Manages $manage, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
