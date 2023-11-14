@@ -54,14 +54,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $contacts_send;
 
     #[ORM\OneToMany(mappedBy: 'app_user_receive', targetEntity: Contacts::class, orphanRemoval: true)]
-    private Collection $contacts_receive;
+    private Collection $contacts_recive;
 
     public function __construct()
     {
         $this->researchCenters = new ArrayCollection();
         $this->investors = new ArrayCollection();
         $this->contacts_send = new ArrayCollection();
-        $this->contacts_receive = new ArrayCollection();
+        $this->contacts_recive = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -283,25 +283,25 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getContactsReceive(): Collection
     {
-        return $this->contacts_receive;
+        return $this->contacts_recive;
     }
 
-    public function addContactsReceive(Contacts $contactsReceive): static
+    public function addContactsReceive(Contacts $contactsRecive): static
     {
-        if (!$this->contacts_receive->contains($contactsReceive)) {
-            $this->contacts_receive->add($contactsReceive);
-            $contactsReceive->setAppUserReceive($this);
+        if (!$this->contacts_recive->contains($contactsRecive)) {
+            $this->contacts_recive->add($contactsRecive);
+            $contactsRecive->setAppUserRecive($this);
         }
 
         return $this;
     }
 
-    public function removeContactsReceive(Contacts $contactsReceive): static
+    public function removeContactsReceive(Contacts $contactsRecive): static
     {
-        if ($this->contacts_receive->removeElement($contactsReceive)) {
+        if ($this->contacts_recive->removeElement($contactsRecive)) {
             // set the owning side to null (unless already changed)
-            if ($contactsReceive->getAppUserReceive() === $this) {
-                $contactsReceive->setAppUserReceive(null);
+            if ($contactsRecive->getAppUserRecive() === $this) {
+                $contactsRecive->setAppUserRecive(null);
             }
         }
 
