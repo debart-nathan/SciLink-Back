@@ -28,8 +28,8 @@ class ManagesController extends AbstractController
             $managesArray[] = [
                 'id' => $manage->getId(),
                 'Grade' => $manage->getGrade(),
-                'Personnel' => $manage->getPersonnel(),
-                'ResearchCenter' => $manage->getResearchCenter(),
+                'Personnel' => $manage->getPersonnel()->getId(),
+                'ResearchCenter' => $manage->getResearchCenter()->getId(),
             ];
         }
         $managesJson = json_encode($managesArray);
@@ -42,8 +42,8 @@ class ManagesController extends AbstractController
         $manageArray = [
             'id' => $manage->getId(),
             'Grade' => $manage->getGrade(),
-            'Personnel' => $manage->getPersonnel(),
-            'ResearchCenter' => $manage->getResearchCenter(),
+            'Personnel' => $manage->getPersonnel()->getId(),
+            'ResearchCenter' => $manage->getResearchCenter()->getId(),
         ];
         $manageJson = json_encode($manageArray);
         return new JsonResponse($manageJson, 200, [], true);
@@ -70,8 +70,8 @@ class ManagesController extends AbstractController
         $manageArray = [
             'id' => $manage->getId(),
             'Grade' => $manage->getGrade(),
-            'Personnel' => $manage->getPersonnel(),
-            'ResearchCenter' => $manage->getResearchCenter(),
+            'Personnel' => $manage->getPersonnel()->getId(),
+            'ResearchCenter' => $manage->getResearchCenter()->getId(),
         ];
         $manageJson = json_encode($manageArray);
         return new JsonResponse($manageJson, 200, [], true);

@@ -31,8 +31,8 @@ class TutellesController extends AbstractController
                 'uai' => $tutelle->getUai(),
                 'siret' => $tutelle->getSiret(),
                 'type' => $tutelle->getType(),
-                'investor' => $tutelle->getInvestor(),
-                'researchCenter' => $tutelle->getResearchCenter(),
+                'investor' => $tutelle->getInvestor()->getId(),
+                'researchCenter' => $tutelle->getResearchCenter()->getId(),
             ];
         }
         $tutellesJson = json_encode($tutellesArray);
@@ -48,8 +48,8 @@ class TutellesController extends AbstractController
             'uai' => $tutelle->getUai(),
             'siret' => $tutelle->getSiret(),
             'type' => $tutelle->getType(),
-            'investor' => $tutelle->getInvestor(),
-            'researchCenter' => $tutelle->getResearchCenter(),
+            'investor' => $tutelle->getInvestor()->getId(),
+            'researchCenter' => $tutelle->getResearchCenter()->getId(),
             
         ];
         $tutelleJson = json_encode($tutelleArray);
@@ -86,8 +86,8 @@ class TutellesController extends AbstractController
             'uai' => $tutelle->getUai(),
             'siret' => $tutelle->getSiret(),
             'type' => $tutelle->getType(),
-            'investor' => $tutelle->getInvestor(),
-            'researchCenter' => $tutelle->getResearchCenter(),
+            'investor' => $tutelle->getInvestor()->getId(),
+            'researchCenter' => $tutelle->getResearchCenter()->getId(),
             
         ];
         $tutelleJson = json_encode($tutelleArray);
