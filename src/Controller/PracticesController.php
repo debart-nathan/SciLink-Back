@@ -22,7 +22,7 @@ class PracticesController extends AbstractController
                 $researcherId = $queryParams['researcher_id'];
             }
             // Vérifie si l'identifiant du domaine est présent dans les paramètres
-            if (isset($queryParams[''])) {
+            if (isset($queryParams['domain_id'])) {
                 $domainId = $queryParams['domain_id'];
             }
         }
