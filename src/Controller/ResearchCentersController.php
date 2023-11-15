@@ -30,18 +30,10 @@ class ResearchCentersController extends AbstractController
                 'id' => $researchCenter->getId(),
                 'label' => $researchCenter->getLibelle(),
                 'sigle' => $researchCenter->getSigle(),
-                'foundingYear' => $researchCenter->getFoundingYear(),
-                'IsActive' => $researchCenter->isIsActive(),
+                'founding_year' => $researchCenter->getFoundingYear(),
+                'is_active' => $researchCenter->isIsActive(),
                 'website' => $researchCenter->getWebsite(),
-                'FicheMsr' => $researchCenter->getFicheMsr(),
-                // 'parent' => $researchCenter->getParent(),
-                // 'ResearchCenters' => $researchCenter->getResearchCenters(),
-                // 'Located' => $researchCenter->getLocated(),
-                // 'Manage' => $researchCenter->getManages(),
-                // 'Tutelles' => $researchCenter->getTutelles(),
-                // 'Domains' => $researchCenter->getDomains(),
-                // 'Users' => $researchCenter->getUsers(),
-                //'user_id' => $user_id,
+                'fiche_msr' => $researchCenter->getFicheMsr(),
             ];
         }
         $researchCentersJson = json_encode($researchCentersArray);
@@ -51,23 +43,15 @@ class ResearchCentersController extends AbstractController
     #[Route('/ResearchCenters/{id}', name: 'app_ResearchCenters_show', methods: ['GET'])]
     public function show(ResearchCentersRepository $researchCenterRepository, ResearchCenters $researchCenter): JsonResponse
     {
-        // $user_id = $researchCenter->getAppUser() ? $researchCenter->getAppUser()->getId() : null;
         $researchCenterArray = [
             'id' => $researchCenter->getId(),
             'label' => $researchCenter->getLibelle(),
             'sigle' => $researchCenter->getSigle(),
-            'foundingYear' => $researchCenter->getFoundingYear(),
-            'IsActive' => $researchCenter->isIsActive(),
+            'founding_year' => $researchCenter->getFoundingYear(),
+            'is_active' => $researchCenter->isIsActive(),
             'website' => $researchCenter->getWebsite(),
-            'FicheMsr' => $researchCenter->getFicheMsr(),
-            // 'parent' => $researchCenter->getParent(),
-            // 'ResearchCenters' => $researchCenter->getResearchCenters(),
-            // 'Located' => $researchCenter->getLocated(),
-            // 'Manage' => $researchCenter->getManages(),
-            // 'Tutelles' => $researchCenter->getTutelles(),
-            // 'Domains' => $researchCenter->getDomains(),
-            // 'Users' => $researchCenter->getUsers(),
-            //   'user_id' => $user_id,
+            'fiche_msr' => $researchCenter->getFicheMsr(),
+
         ];
         $researchCenterJson = json_encode($researchCenterArray);
         return new JsonResponse($researchCenterJson, 200, [], true);
@@ -84,42 +68,32 @@ class ResearchCentersController extends AbstractController
         if (isset($data['sigle'])) {
             $researchCenter->setSigle($data['sigle']);
         }
-        if (isset($data['foundingYear'])) {
-            $researchCenter->setFoundingYear($data['foundingYear']);
+        if (isset($data['founding_year'])) {
+            $researchCenter->setFoundingYear($data['founding_year']);
         }
-        if (isset($data['IsActive'])) {
-            $researchCenter->setIsActive($data['IsActive']);
+        if (isset($data['is_active'])) {
+            $researchCenter->setIsActive($data['is_active']);
         }
         if (isset($data['website'])) {
             $researchCenter->setWebsite($data['website']);
         }
-        if (isset($data['FicheMsr'])) {
-            $researchCenter->setFicheMsr($data['FicheMsr']);
-        }
-        if (isset($data['Located'])) {
-            $researchCenter->setLocated($data['Located']);
+        if (isset($data['fiche_msr'])) {
+            $researchCenter->setFicheMsr($data['fiche_msr']);
         }
 
         $entityManager->persist($researchCenter);
         $entityManager->flush();
 
-        // $user_id = $researchCenter->getAppUser() ? $researchCenter->getAppUser()->getId() : null;
+
         $researchCenterArray = [
             'id' => $researchCenter->getId(),
             'label' => $researchCenter->getLibelle(),
             'sigle' => $researchCenter->getSigle(),
-            'foundingYear' => $researchCenter->getFoundingYear(),
-            'IsActive' => $researchCenter->isIsActive(),
+            'founding_year' => $researchCenter->getFoundingYear(),
+            'is_active' => $researchCenter->isIsActive(),
             'website' => $researchCenter->getWebsite(),
-            'FicheMsr' => $researchCenter->getFicheMsr(),
-            // 'parent' => $researchCenter->getParent(),
-            // 'ResearchCenters' => $researchCenter->getResearchCenters(),
-            // 'Located' => $researchCenter->getLocated(),
-            // 'Manage' => $researchCenter->getManages(),
-            // 'Tutelles' => $researchCenter->getTutelles(),
-            // 'Domains' => $researchCenter->getDomains(),
-            // 'Users' => $researchCenter->getUsers(),
-            //     'user_id' => $user_id,
+            'fiche_msr' => $researchCenter->getFicheMsr(),
+
         ];
         $researchCenterJson = json_encode($researchCenterArray);
         return new JsonResponse($researchCenterJson, 200, [], true);
