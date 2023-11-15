@@ -18,7 +18,7 @@ class LocationsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Location::class);
+        parent::__construct($registry, Locations::class);
     }
 
 //    /**
