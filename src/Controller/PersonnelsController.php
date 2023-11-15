@@ -25,9 +25,9 @@ class PersonnelsController extends AbstractController
         foreach ($personnels as $personnel) {
             $personnelsArray[] = [
                 'id' => $personnel->getId(),
-                'firstName' => $personnel->getFirstName(),
-                'lastName' => $personnel->getLastName(),
-                'manages' => $personnel->getManages(),
+                'first_name' => $personnel->getFirstName(),
+                'last_name' => $personnel->getlastName(),
+                // 'manages' => $personnel->getManages(),
             ];
         }
         $personnelsJson = json_encode($personnelsArray);
@@ -39,9 +39,9 @@ class PersonnelsController extends AbstractController
     {
         $personnelArray = [
             'id' => $personnel->getId(),
-            'firstName' => $personnel->getFirstName(),
-            'lastName' => $personnel->getLastName(),
-            'manages' => $personnel->getManages(),
+            'first_name' => $personnel->getFirstName(),
+            'last_name' => $personnel->getLastName(),
+            // 'manages' => $personnel->getManages(),
         ];
         $personnelJson = json_encode($personnelArray);
         return new JsonResponse($personnelJson, 200, [], true);
@@ -52,11 +52,11 @@ class PersonnelsController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['firstName'])) {
-            $personnel->setFirstName($data['firstName']);
+        if (isset($data['first_name'])) {
+            $personnel->setFirstName($data['first_name']);
         }
-        if (isset($data['lastName'])) {
-            $personnel->setLastName($data['lastName']);
+        if (isset($data['last_name'])) {
+            $personnel->setLastName($data['last_name']);
         }
 
         $entityManager->persist($personnel);
@@ -64,9 +64,9 @@ class PersonnelsController extends AbstractController
 
         $personnelArray = [
             'id' => $personnel->getId(),
-            'firstName' => $personnel->getFirstName(),
-            'lastName' => $personnel->getLastName(),
-            'manages' => $personnel->getManages(),
+            'first_name' => $personnel->getFirstName(),
+            'last_name' => $personnel->getLastName(),
+            // 'manages' => $personnel->getManages(),
         ];
         $personnelJson = json_encode($personnelArray);
         return new JsonResponse($personnelJson, 200, [], true);
