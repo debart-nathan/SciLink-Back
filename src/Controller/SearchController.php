@@ -23,7 +23,8 @@ class SearchController extends AbstractController
         ResearchersRepository $researchersRepository,
         ResearchCentersRepository $researchCentersRepository,
         InvestorsRepository $investorsRepository,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+
     ) {
         $this->researchersRepository = $researchersRepository;
         $this->researchCentersRepository = $researchCentersRepository;
@@ -72,7 +73,7 @@ class SearchController extends AbstractController
         array_walk($results, function (&$item) {
             unset($item['score']);
         });
-        
+
         return $this->json($results);
     }
 
@@ -107,7 +108,12 @@ class SearchController extends AbstractController
                         }
 
                         return $object;
-                    }
+                    },
+                    'ignore_user_password' => true,
+                    'ignore_user_roles' => true,
+                    'ignore_user_contacts' => true,
+                    'ignore_user_email_unless_accepted_contact_or_same_user' => true,
+
                 ]),
                 'score' => $score,
             ];
