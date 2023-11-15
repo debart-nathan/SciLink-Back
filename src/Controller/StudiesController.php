@@ -22,7 +22,7 @@ class StudiesController extends AbstractController
                 $researchCenterId = $queryParams['research_center_id'];
             }
             // Vérifie si l'identifiant du domaine est présent dans les paramètres
-            if (isset($queryParams[''])) {
+            if (isset($queryParams['domain_id'])) {
                 $domainId = $queryParams['domain_id'];
             }
         }
