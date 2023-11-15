@@ -31,8 +31,8 @@ class TutellesController extends AbstractController
                 'uai' => $tutelle->getUai(),
                 'siret' => $tutelle->getSiret(),
                 'type' => $tutelle->getType(),
-                'investor' => $tutelle->getInvestor()->getId(),
-                'researchCenter' => $tutelle->getResearchCenter()->getId(),
+                'investor_id' => $tutelle->getInvestor()->getId(),
+                'research_center_id' => $tutelle->getResearchCenter()->getId(),
             ];
         }
         $tutellesJson = json_encode($tutellesArray);
@@ -48,8 +48,8 @@ class TutellesController extends AbstractController
             'uai' => $tutelle->getUai(),
             'siret' => $tutelle->getSiret(),
             'type' => $tutelle->getType(),
-            'investor' => $tutelle->getInvestor()->getId(),
-            'researchCenter' => $tutelle->getResearchCenter()->getId(),
+            'investor_id' => $tutelle->getInvestor()->getId(),
+            'research_center_id' => $tutelle->getResearchCenter()->getId(),
 
         ];
         $tutelleJson = json_encode($tutelleArray);
@@ -70,11 +70,11 @@ class TutellesController extends AbstractController
         if (isset($data['type'])) {
             $tutelle->setType($data['type']);
         }
-        if (isset($data['investor'])) {
-            $tutelle->setInvestor($data['investor']);
+        if (isset($data['investor_id'])) {
+            $tutelle->setInvestor($data['investor_id']);
         }
-        if (isset($data['researchCenter'])) {
-            $tutelle->setResearchCenter($data['researchCenter']);
+        if (isset($data['research_center_id'])) {
+            $tutelle->setResearchCenter($data['research_center_id']);
         }
 
         $entityManager->persist($tutelle);
@@ -86,8 +86,8 @@ class TutellesController extends AbstractController
             'uai' => $tutelle->getUai(),
             'siret' => $tutelle->getSiret(),
             'type' => $tutelle->getType(),
-            'investor' => $tutelle->getInvestor()->getId(),
-            'researchCenter' => $tutelle->getResearchCenter()->getId(),
+            'investor_id' => $tutelle->getInvestor()->getId(),
+            'research_center_id' => $tutelle->getResearchCenter()->getId(),
 
         ];
         $tutelleJson = json_encode($tutelleArray);
