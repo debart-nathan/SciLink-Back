@@ -27,11 +27,11 @@ class ContactsController extends AbstractController
         foreach ($contacts as $contact) {
             $contactsArray[] = [
                 'id' => $contact->getId(),
-                'sendDate' => $contact->getSendDate()->format('d-m-y H:i:s'),
+                'send_date' => $contact->getSendDate()->format('d-m-y H:i:s'),
                 'object' => $contact->getObject(),
-                'appUserSend' => $contact->getAppUserSend()->getId(),
-                'appUserReceive' => $contact->getAppUserReceive()->getId(),
-                'relationStatus' => $contact->getRelationStatus()->getId(),
+                'app_user_send_id' => $contact->getAppUserSend()->getId(),
+                'app_user_receive_id' => $contact->getAppUserReceive()->getId(),
+                'relation_status' => $contact->getRelationStatus()->getId(),
             ];
         }
         $contactsJson = json_encode($contactsArray);
@@ -43,11 +43,11 @@ class ContactsController extends AbstractController
     {
         $contactArray = [
             'id' => $contact->getId(),
-            'sendDate' => $contact->getSendDate()->format('d-m-y H:i:s'),
+            'send_date' => $contact->getSendDate()->format('d-m-y H:i:s'),
             'object' => $contact->getObject(),
-            'appUserSend' => $contact->getAppUserSend()->getId(),
-            'appUserReceive' => $contact->getAppUserReceive()->getId(),
-            'relationStatus' => $contact->getRelationStatus()->getId(),
+            'app_user_send_id' => $contact->getAppUserSend()->getId(),
+            'app_user_receive' => $contact->getAppUserReceive()->getId(),
+            'relation_status' => $contact->getRelationStatus()->getId(),
         ];
         $contactJson = json_encode($contactArray);
         return new JsonResponse($contactJson, 200, [], true);
@@ -58,20 +58,20 @@ class ContactsController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['sendDate'])) {
-            $contact->setSendDate($data['sendDate']);
+        if (isset($data['send_date'])) {
+            $contact->setSendDate($data['send_date']);
         }
         if (isset($data['object'])) {
             $contact->setObject($data['object']);
         }
-        if (isset($data['appUserSend'])) {
-            $contact->setAppUserSend($data['appUserSend']);
+        if (isset($data['app_user_send_id'])) {
+            $contact->setAppUserSend($data['app_user_send_id']);
         }
-        if (isset($data['appUserReceive'])) {
-            $contact->setAppUserReceive($data['appUserReceive']);
+        if (isset($data['app_user_receive_id'])) {
+            $contact->setAppUserReceive($data['app_user_receive_id']);
         }
-        if (isset($data['relationStatus'])) {
-            $contact->setRelationStatus($data['relationStatus']);
+        if (isset($data['relation_status'])) {
+            $contact->setRelationStatus($data['relation_status']);
         }
 
         $entityManager->persist($contact);
@@ -79,11 +79,11 @@ class ContactsController extends AbstractController
 
         $contactArray = [
             'id' => $contact->getId(),
-            'sendDate' => $contact->getSendDate()->format('d-m-y H:i:s'),
+            'send_date' => $contact->getSendDate()->format('d-m-y H:i:s'),
             'object' => $contact->getObject(),
-            'appUserSend' => $contact->getAppUserSend()->getId(),
-            'appUserReceive' => $contact->getAppUserReceive()->getId(),
-            'relationStatus' => $contact->getRelationStatus()->getId(),
+            'app_user_send_id' => $contact->getAppUserSend()->getId(),
+            'app_user_receive_id' => $contact->getAppUserReceive()->getId(),
+            'relation_status' => $contact->getRelationStatus()->getId(),
         ];
         $contactJson = json_encode($contactArray);
         return new JsonResponse($contactJson, 200, [], true);
