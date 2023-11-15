@@ -57,7 +57,7 @@ private Collection $manages;
     public function __construct()
     {
         $this->parents = new ArrayCollection();
-        $this->researchCenters = new ArrayCollection();
+        $this->childrens = new ArrayCollection();
         $this->manages = new ArrayCollection();
         $this->tutelles = new ArrayCollection();
         $this->domains = new ArrayCollection();
