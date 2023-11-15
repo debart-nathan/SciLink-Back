@@ -33,11 +33,11 @@ class ResearchCenters
     #[ORM\Column(length: 255)]
     private ?string $fiche_msr = null;
 
-    #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'researchCenters')]
+    #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'childrens')]
     private Collection $parents;
 
     #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'parents')]
-    private Collection $researchCenters;
+    private Collection $childrens;
 
     #[ORM\ManyToOne(inversedBy: 'researchCenters')]
     private ?Locations $located = null;
@@ -168,25 +168,25 @@ private Collection $manages;
     /**
      * @return Collection<int, self>
      */
-    public function getResearchCenters(): Collection
+    public function getChildrens(): Collection
     {
-        return $this->researchCenters;
+        return $this->childrens;
     }
 
-    public function addResearchCenter(self $researchCenter): static
+    public function addChildren(self $children): static
     {
-        if (!$this->researchCenters->contains($researchCenter)) {
-            $this->researchCenters->add($researchCenter);
-            $researchCenter->addParent($this);
+        if (!$this->childrens->contains($children)) {
+            $this->childrens->add($children);
+            $children->addParent($this);
         }
 
         return $this;
     }
 
-    public function removeResearchCenter(self $researchCenter): static
+    public function removeChildren(self $children): static
     {
-        if ($this->researchCenters->removeElement($researchCenter)) {
-            $researchCenter->removeParent($this);
+        if ($this->childrens->removeElement($children)) {
+            $children->removeParent($this);
         }
 
         return $this;
