@@ -35,9 +35,12 @@ class UsersController extends AbstractController
         $usersArray = [];
         foreach ($users as $user) {
             $privacySecurity = (
-                $token &&
-                ($loggedInUser === $user) &&
-                $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
+                $token && (
+                    // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                    (($loggedInUser->getId() === $user->getId())) ||
+                    // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
+                    $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
+                )
             );
             $usersArray[] = [
                 'id' => $user->getId(),
@@ -45,7 +48,7 @@ class UsersController extends AbstractController
                 'first_name' => $user->getFirstName(),
                 'last_name' => $user->getLastName(),
                 'email' => $privacySecurity ? $user->getEmail() : null,
-                'location_id' => $user->getLocation()->getId(),
+                'location_id' => $user->getLocation() ? $user->getLocation()->getId() : null,
             ];
         }
         $usersJson = json_encode($usersArray);
