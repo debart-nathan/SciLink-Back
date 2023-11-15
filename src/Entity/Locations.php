@@ -78,7 +78,7 @@ class Locations
     }
 
     /**
-     * @return Collection<int, ResearchCenter>
+     * @return Collection<int, ResearchCenters>
      */
     public function getResearchCenters(): Collection
     {

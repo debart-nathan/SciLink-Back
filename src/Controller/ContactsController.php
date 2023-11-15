@@ -30,7 +30,7 @@ class ContactsController extends AbstractController
                 'sendDate' => $contact->getSendDate()->format('d-m-y H:i:s'),
                 'object' => $contact->getObject(),
                 'appUserSend' => $contact->getAppUserSend()->getId(),
-                'appUserRecive' => $contact->getAppUserRecive()->getId(),
+                'appUserReceive' => $contact->getAppUserReceive()->getId(),
                 'relationStatus' => $contact->getRelationStatus()->getId(),
             ];
         }
@@ -46,7 +46,7 @@ class ContactsController extends AbstractController
             'sendDate' => $contact->getSendDate()->format('d-m-y H:i:s'),
             'object' => $contact->getObject(),
             'appUserSend' => $contact->getAppUserSend()->getId(),
-            'appUserRecive' => $contact->getAppUserRecive()->getId(),
+            'appUserReceive' => $contact->getAppUserReceive()->getId(),
             'relationStatus' => $contact->getRelationStatus()->getId(),
         ];
         $contactJson = json_encode($contactArray);
@@ -68,7 +68,7 @@ class ContactsController extends AbstractController
             $contact->setAppUserSend($data['appUserSend']);
         }
         if (isset($data['appUserReceive'])) {
-            $contact->setAppUserRecive($data['appUserRecive']);
+            $contact->setAppUserReceive($data['appUserReceive']);
         }
         if (isset($data['relationStatus'])) {
             $contact->setRelationStatus($data['relationStatus']);
@@ -82,7 +82,7 @@ class ContactsController extends AbstractController
             'sendDate' => $contact->getSendDate()->format('d-m-y H:i:s'),
             'object' => $contact->getObject(),
             'appUserSend' => $contact->getAppUserSend()->getId(),
-            'appUserRecive' => $contact->getAppUserRecive()->getId(),
+            'appUserReceive' => $contact->getAppUserReceive()->getId(),
             'relationStatus' => $contact->getRelationStatus()->getId(),
         ];
         $contactJson = json_encode($contactArray);

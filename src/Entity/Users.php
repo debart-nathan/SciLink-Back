@@ -54,7 +54,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $contacts_send;
 
     #[ORM\OneToMany(mappedBy: 'app_user_receive', targetEntity: Contacts::class, orphanRemoval: true)]
-    private Collection $contacts_recive;
+    private Collection $contacts_receive;
 
     public function __construct()
     {
@@ -283,25 +283,25 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getContactsReceive(): Collection
     {
-        return $this->contacts_recive;
+        return $this->contacts_receive;
     }
 
-    public function addContactsReceive(Contacts $contactsRecive): static
+    public function addContactsReceive(Contacts $contactsReceive): static
     {
-        if (!$this->contacts_recive->contains($contactsRecive)) {
-            $this->contacts_recive->add($contactsRecive);
-            $contactsRecive->setAppUserRecive($this);
+        if (!$this->contacts_recive->contains($contactsReceive)) {
+            $this->contacts_recive->add($contactsReceive);
+            $contactsReceive->setAppUserReceive($this);
         }
 
         return $this;
     }
 
-    public function removeContactsReceive(Contacts $contactsRecive): static
+    public function removeContactsReceive(Contacts $contactsReceive): static
     {
-        if ($this->contacts_recive->removeElement($contactsRecive)) {
+        if ($this->contacts_recive->removeElement($contactsReceive)) {
             // set the owning side to null (unless already changed)
-            if ($contactsRecive->getAppUserRecive() === $this) {
-                $contactsRecive->setAppUserRecive(null);
+            if ($contactsReceive->getAppUserReceive() === $this) {
+                $contactsReceive->setAppUserReceive(null);
             }
         }
 

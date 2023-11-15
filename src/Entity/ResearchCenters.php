@@ -34,9 +34,9 @@ class ResearchCenters
     private ?string $fiche_msr = null;
 
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'researchCenters')]
-    private Collection $parent;
+    private Collection $parents;
 
-    #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'parent')]
+    #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'parents')]
     private Collection $researchCenters;
 
     #[ORM\ManyToOne(inversedBy: 'researchCenters')]
@@ -56,7 +56,7 @@ private Collection $manages;
 
     public function __construct()
     {
-        $this->parent = new ArrayCollection();
+        $this->parents = new ArrayCollection();
         $this->researchCenters = new ArrayCollection();
         $this->manages = new ArrayCollection();
         $this->tutelles = new ArrayCollection();
@@ -144,15 +144,15 @@ private Collection $manages;
     /**
      * @return Collection<int, self>
      */
-    public function getParent(): Collection
+    public function getParents(): Collection
     {
-        return $this->parent;
+        return $this->parents;
     }
 
     public function addParent(self $parent): static
     {
-        if (!$this->parent->contains($parent)) {
-            $this->parent->add($parent);
+        if (!$this->parents->contains($parent)) {
+            $this->parents->add($parent);
         }
 
         return $this;
@@ -160,7 +160,7 @@ private Collection $manages;
 
     public function removeParent(self $parent): static
     {
-        $this->parent->removeElement($parent);
+        $this->parents->removeElement($parent);
 
         return $this;
     }
