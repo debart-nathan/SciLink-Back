@@ -28,7 +28,7 @@ class ResearchersController extends AbstractController
             $user_id = $researcher->getUser() ? $researcher->getUser()->getId() : null;
             $researchersArray[] = [
                 'id' => $researcher->getId(),
-                'descriptions' => $researcher->getDescriptions(),
+                'description' => $researcher->getDescription(),
                 'user_id' => $user_id,
             ];
         }
@@ -42,7 +42,7 @@ class ResearchersController extends AbstractController
         $user_id = $researcher->getUser() ? $researcher->getUser()->getId() : null;
         $researcherArray = [
             'id' => $researcher->getId(),
-            'descriptions' => $researcher->getDescriptions(),
+            'description' => $researcher->getDescription(),
             'user_id' => $user_id,
         ];
         $researcherJson = json_encode($researcherArray);
@@ -52,11 +52,10 @@ class ResearchersController extends AbstractController
     #[Route('/Researchers/{id}', name: 'app_researchers_update', methods: ['PATCH'])]
     public function update(ResearchersRepository $researcherRepository, Researchers $researcher, Request $request,EntityManagerInterface $entityManager): JsonResponse
     {
-        //return new JsonResponse($request->getContent());
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['descriptions'])) {
-            $researcher->setDescriptions($data['descriptions']);
+        if (isset($data['description'])) {
+            $researcher->setDescription($data['description']);
         }
 
         $entityManager->persist($researcher);
@@ -65,7 +64,7 @@ class ResearchersController extends AbstractController
         $user_id = $researcher->getUser() ? $researcher->getUser()->getId() : null;
         $researcherArray = [
             'id' => $researcher->getId(),
-            'descriptions' => $researcher->getDescriptions(),
+            'description' => $researcher->getDescription(),
             'user_id' => $user_id,
         ];
         $researcherJson = json_encode($researcherArray);

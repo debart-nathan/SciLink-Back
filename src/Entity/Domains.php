@@ -83,7 +83,7 @@ class Domains
     {
         if (!$this->researchers->contains($researcher)) {
             $this->researchers->add($researcher);
-            $researcher->addDomaine($this);
+            $researcher->addDomain($this);
         }
 
         return $this;
@@ -92,7 +92,7 @@ class Domains
     public function removeResearcher(Researchers $researcher): static
     {
         if ($this->researchers->removeElement($researcher)) {
-            $researcher->removeDomaine($this);
+            $researcher->removeDomain($this);
         }
 
         return $this;

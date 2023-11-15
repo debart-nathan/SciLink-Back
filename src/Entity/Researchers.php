@@ -22,7 +22,7 @@ class Researchers
     private ?Users $app_user = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $descriptions = null;
+    private ?string $description = null;
 
     public function __construct()
     {
@@ -35,14 +35,14 @@ class Researchers
     }
 
     /**
-     * @return Collection<int, Domaines>
+     * @return Collection<int, Domains>
      */
-    public function getDomaines(): Collection
+    public function getDomains(): Collection
     {
         return $this->domains;
     }
 
-    public function addDomaine(Domains $domain): static
+    public function addDomain(Domains $domain): static
     {
         if (!$this->domains->contains($domain)) {
             $this->domains->add($domain);
@@ -51,7 +51,7 @@ class Researchers
         return $this;
     }
 
-    public function removeDomaine(Domains $domain): static
+    public function removeDomain(Domains $domain): static
     {
         $this->domains->removeElement($domain);
 
@@ -80,15 +80,16 @@ class Researchers
         return $this;
     }
 
-    public function getDescriptions(): ?string
+    public function getDescription(): ?string
     {
-        return $this->descriptions;
+        return $this->description;
     }
 
-    public function setDescriptions(string $descriptions): static
+    public function setDescription(string $description): static
     {
-        $this->descriptions = $descriptions;
+        $this->description = $description;
 
         return $this;
     }
+
 }
