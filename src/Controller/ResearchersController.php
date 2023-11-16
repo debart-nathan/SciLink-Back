@@ -2,30 +2,39 @@
 
 namespace App\Controller;
 
-use App\Entity\Researchers;
 use App\Entity\Users;
+use App\Entity\Researchers;
+use App\Repository\UsersRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\ResearchersRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 class ResearchersController extends AbstractController
 {
     #[Route('/Researchers', name: 'app_researchers', methods: ['GET'])]
     public function index(
         ResearchersRepository $researchersRepository,
-        Request $request
+        Request $request,
+        UsersRepository $usersRepository
         ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
             $queryParams = $request->query->all();
-            $researchers = $researchersRepository->findBy($queryParams);
+            if (isset($queryParams['app_user'])) {
+                $user = $usersRepository->find($queryParams['app_user']);
+                if (isset($user)) {
+                    $researchers = [$user->getResearcher()];
+                } else {
+                    $researchers = [];
+                }
+            }
         } else {
             $researchers = $researchersRepository->findAll();
         }
