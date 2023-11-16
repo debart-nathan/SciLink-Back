@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Users;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UsersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,7 +30,7 @@ class UsersController extends AbstractController
                 'first_name' => $user->getFirstName(),
                 'last_name' => $user->getLastName(),
                 'email' => $user->getEmail(),
-                'location_id' => $user->getLocation()->getId(),
+                // 'location_id' => $user->getLocation()->getId(),
             ];
         }
         $usersJson = json_encode($usersArray);
@@ -52,24 +53,24 @@ class UsersController extends AbstractController
         return new JsonResponse($userJson, 200, [], true);
     }
 
-    #[Route('/Users/{id}', name:'', methods: ['PATCH'])]
-    public function update(UsersRepository $usersRepository, Users $user , Request $request): JsonResponse
+    #[Route('/Users/{id}', name: '', methods: ['PATCH'])]
+    public function update(UsersRepository $usersRepository, Users $user, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        if(isset($data['user_name'])) {
+        if (isset($data['user_name'])) {
             $user->setUserName($data['user_name']);
         }
 
-        if(isset($data['first_name'])) {
+        if (isset($data['first_name'])) {
             $user->setFirstName($data['first_name']);
         }
 
-        if(isset($data['last_name'])) {
+        if (isset($data['last_name'])) {
             $user->setLastName($data['last_name']);
         }
 
-        if(isset($data['email'])) {
+        if (isset($data['email'])) {
             $user->setEmail($data['email']);
         }
 
@@ -86,7 +87,22 @@ class UsersController extends AbstractController
         ];
 
         $userJson = json_encode($userArray);
-    
-        return new JsonResponse($userJson,200, [], true);
-}
+
+        return new JsonResponse($userJson, 200, [], true);
+    }
+
+    #[Route('/Users/{id}/delete', name: 'delete_user', methods: ['DELETE'])]
+    public function deleteUser(int $id, EntityManagerInterface $entityManager, UsersRepository $userRepository, Users $user,): JsonResponse
+    {
+
+        $user = $userRepository->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+        $entityManager->remove($user);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'User deleted'], 200);
+    }
 }

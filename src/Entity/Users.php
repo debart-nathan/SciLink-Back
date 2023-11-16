@@ -62,6 +62,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         $this->investors = new ArrayCollection();
         $this->contacts_send = new ArrayCollection();
         $this->contacts_recive = new ArrayCollection();
+        
     }
 
     public function getId(): ?int
