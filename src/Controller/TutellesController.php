@@ -56,7 +56,7 @@ class TutellesController extends AbstractController
         return new JsonResponse($tutelleJson, 200, [], true);
     }
 
-    #[Route('/Tutelles/{id}', name: 'app_tutelles_update', methods: ['PATCH'])]
+    #[Route('/Tutelles/patch/{id}', name: 'app_tutelles_update', methods: ['PATCH'])]
     public function update(TutellesRepository $tutelleRepository, Tutelles $tutelle, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

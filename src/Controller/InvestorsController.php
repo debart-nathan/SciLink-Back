@@ -55,7 +55,7 @@ class InvestorsController extends AbstractController
         return new JsonResponse($investorJson, 200, [], true);
     }
 
-    #[Route('/Investors/{id}', name: 'app_investors_update', methods: ['PATCH'])]
+    #[Route('/Investors/patch/{id}', name: 'app_investors_update', methods: ['PATCH'])]
     public function update(InvestorsRepository $investorRepository, Investors $investor, Request $request,EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
