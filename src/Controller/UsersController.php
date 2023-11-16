@@ -35,7 +35,8 @@ class UsersController extends AbstractController
         foreach ($users as $user) {
             $privacySecurity = (
                 $token && (
-                        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                    // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+
                     (($token->getUser()->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
@@ -54,7 +55,8 @@ class UsersController extends AbstractController
         return new JsonResponse($usersJson, 200, [], true);
     }
 
-    #[Route('/Users/{id}', name: '', methods: ['GET'])]
+    #[Route('/Users/{id}', name: 'app_users_show', methods: ['GET'])]
+
     public function show(
         ContactVoter $contactVoter,
         TokenStorageInterface $tokenStorage,
@@ -63,7 +65,7 @@ class UsersController extends AbstractController
         $token = $tokenStorage->getToken();
         $privacySecurity = (
             $token && (
-                    // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                // vérifie que l'utilisateur connecté est l'utilisateur de la donné
                 (($token->getUser()->getId() === $user->getId())) ||
                 // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                 $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
@@ -82,7 +84,7 @@ class UsersController extends AbstractController
         return new JsonResponse($userJson, 200, [], true);
     }
 
-    #[Route('/Users/{id}', name: '', methods: ['PATCH'])]
+    #[Route('/Users/{id}/patch', name: 'app_users_update', methods: ['PATCH'])]
     public function update(TokenStorageInterface $tokenStorage, UsersRepository $usersRepository, Users $user, Request $request): JsonResponse
     {
         $token = $tokenStorage->getToken();

@@ -57,8 +57,10 @@ class InvestorsController extends AbstractController
         return new JsonResponse($investorJson, 200, [], true);
     }
 
-    #[Route('/Investors/{id}', name: 'app_investors_update', methods: ['PATCH'])]
+
+    #[Route('/Investors/{id}/patch', name: 'app_investors_update', methods: ['PATCH'])]
     public function update(InvestorsRepository $investorRepository, Investors $investor, Request $request,EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné

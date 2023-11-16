@@ -52,8 +52,10 @@ class LocationsController extends AbstractController
     }
 
 
-    #[Route('/Locations/{id}', name: 'app_locations_update', methods: ['PATCH'])]
+
+    #[Route('/Locations/{id}/patch', name: 'app_locations_update', methods: ['PATCH'])]
     public function update( Locations $locations, Request $request,EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné

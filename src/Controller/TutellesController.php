@@ -58,8 +58,10 @@ class TutellesController extends AbstractController
         return new JsonResponse($tutelleJson, 200, [], true);
     }
 
-    #[Route('/Tutelles/{id}', name: 'app_tutelles_update', methods: ['PATCH'])]
+
+    #[Route('/Tutelles/{id}/patch', name: 'app_tutelles_update', methods: ['PATCH'])]
     public function update(TutellesRepository $tutelleRepository, Tutelles $tutelle, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné

@@ -48,7 +48,8 @@ class RelationStatusController extends AbstractController
         return new JsonResponse($relationStatusJson, 200, [], true);
     }
 
-    #[Route('/RelationStatus/{id}', name: 'app_relation_status_update', methods: ['PATCH'])]
+
+    #[Route('/RelationStatus/{id}/patch', name: 'app_relation_status_update', methods: ['PATCH'])]
     public function update(
         RelationStatusRepository $relationStatusRepository,
         RelationStatus $relationStatus,
@@ -61,6 +62,7 @@ class RelationStatusController extends AbstractController
         if (!($token && ($token->getUser()->getId() === $user->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
+
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['status'])) {

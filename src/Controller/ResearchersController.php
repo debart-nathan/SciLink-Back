@@ -51,8 +51,10 @@ class ResearchersController extends AbstractController
         return new JsonResponse($researcherJson, 200, [], true);
     }
 
-    #[Route('/Researchers/{id}', name: 'app_researchers_update', methods: ['PATCH'])]
+
+    #[Route('/Researchers/{id}/patch', name: 'app_researchers_update', methods: ['PATCH'])]
     public function update(ResearchersRepository $researcherRepository, Researchers $researcher, Request $request,EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné

@@ -51,8 +51,10 @@ class ManagesController extends AbstractController
         return new JsonResponse($manageJson, 200, [], true);
     }
 
-    #[Route('/Manages/{id}', name: 'app_manages_update', methods: ['PATCH'])]
+
+    #[Route('/Manages/{id}/patch', name: 'app_manages_update', methods: ['PATCH'])]
     public function update(ManagesRepository $manageRepository, Manages $manage, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné

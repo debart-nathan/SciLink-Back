@@ -49,8 +49,10 @@ class PersonnelsController extends AbstractController
         return new JsonResponse($personnelJson, 200, [], true);
     }
 
-    #[Route('/Personnels/{id}', name: 'app_personnels_update', methods: ['PATCH'])]
+
+    #[Route('/Personnels/{id}/patch', name: 'app_personnels_update', methods: ['PATCH'])]
     public function update(PersonnelsRepository $personnelRepository, Personnels $personnel, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné

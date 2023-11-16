@@ -59,12 +59,14 @@ class ResearchCentersController extends AbstractController
         return new JsonResponse($researchCenterJson, 200, [], true);
     }
 
-    #[Route('/ResearchCenters/{id}', name: 'app_ResearchCenters_update', methods: ['PATCH'])]
+
+    #[Route('/ResearchCenters/{id}/patch', name: 'app_ResearchCenters_update', methods: ['PATCH'])]
     public function update(
         ResearchCentersRepository $researchCenterRepository,
          ResearchCenters $researchCenter, Request $request,
          EntityManagerInterface $entityManager,
          TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné

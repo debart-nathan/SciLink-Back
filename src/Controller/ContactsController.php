@@ -55,8 +55,10 @@ class ContactsController extends AbstractController
         return new JsonResponse($contactJson, 200, [], true);
     }
 
-    #[Route('/Contacts/{id}', name: 'app_contacts_update', methods: ['PATCH'])]
+
+    #[Route('/Contacts/{id}/patch', name: 'app_contacts_update', methods: ['PATCH'])]
     public function update(ContactsRepository $contactRepository, Contacts $contact, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
