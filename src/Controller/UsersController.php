@@ -33,11 +33,13 @@ class UsersController extends AbstractController
         $token = $tokenStorage->getToken();
         $usersArray = [];
         foreach ($users as $user) {
+             /** @var Users $loginUser */
+            $loginUser = $token->getUser();
             $privacySecurity = (
                 $token && (
                     // vérifie que l'utilisateur connecté est l'utilisateur de la donné
 
-                    (($token->getUser()->getId() === $user->getId())) ||
+                    (($loginUser->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
                 )
@@ -63,10 +65,12 @@ class UsersController extends AbstractController
         Users $user
     ): JsonResponse {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         $privacySecurity = (
             $token && (
                 // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-                (($token->getUser()->getId() === $user->getId())) ||
+                (($loginUser->getId() === $user->getId())) ||
                 // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                 $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
             )
