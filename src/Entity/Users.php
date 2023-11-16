@@ -61,7 +61,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         $this->researchCenters = new ArrayCollection();
         $this->investors = new ArrayCollection();
         $this->contacts_send = new ArrayCollection();
-        $this->contacts_recive = new ArrayCollection();
+        $this->contacts_receive = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -288,8 +288,8 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function addContactsReceive(Contacts $contactsReceive): static
     {
-        if (!$this->contacts_recive->contains($contactsReceive)) {
-            $this->contacts_recive->add($contactsReceive);
+        if (!$this->contacts_receive->contains($contactsReceive)) {
+            $this->contacts_receive->add($contactsReceive);
             $contactsReceive->setAppUserReceive($this);
         }
 
@@ -298,7 +298,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeContactsReceive(Contacts $contactsReceive): static
     {
-        if ($this->contacts_recive->removeElement($contactsReceive)) {
+        if ($this->contacts_receive->removeElement($contactsReceive)) {
             // set the owning side to null (unless already changed)
             if ($contactsReceive->getAppUserReceive() === $this) {
                 $contactsReceive->setAppUserReceive(null);

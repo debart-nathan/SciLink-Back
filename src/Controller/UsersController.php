@@ -32,18 +32,20 @@ class UsersController extends AbstractController
         }
         $token = $tokenStorage->getToken();
         $usersArray = [];
+        $privacySecurity = false;
         foreach ($users as $user) {
-             /** @var Users $loginUser */
-            $loginUser = $token->getUser();
-            $privacySecurity = (
-                $token && (
+            if ($token) {
+                /** @var Users $loginUser */
+                $loginUser = $token->getUser();
+                $privacySecurity = (
                     // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-
                     (($loginUser->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
-                )
-            );
+
+                );
+            }
+
             $usersArray[] = [
                 'id' => $user->getId(),
                 'user_name' => $user->getUserName(),
@@ -65,16 +67,18 @@ class UsersController extends AbstractController
         Users $user
     ): JsonResponse {
         $token = $tokenStorage->getToken();
-        /** @var Users $loginUser */
-        $loginUser = $token->getUser();
-        $privacySecurity = (
-            $token && (
+        $privacySecurity=false;
+        if ($token) {
+            /** @var Users $loginUser */
+            $loginUser = $token->getUser();
+            $privacySecurity = (
                 // vérifie que l'utilisateur connecté est l'utilisateur de la donné
                 (($loginUser->getId() === $user->getId())) ||
                 // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                 $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
-            )
-        );
+
+            );
+        }
         $userArray = [
             'id' => $user->getId(),
             'user_name' => $user->getUserName(),
@@ -92,9 +96,9 @@ class UsersController extends AbstractController
     public function update(
         TokenStorageInterface $tokenStorage,
         UsersRepository $usersRepository,
-        Users $user, Request $request
-        ): JsonResponse
-    {
+        Users $user,
+        Request $request
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
