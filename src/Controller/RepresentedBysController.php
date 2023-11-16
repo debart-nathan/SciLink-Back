@@ -14,7 +14,11 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class RepresentedBysController extends AbstractController
 {
     #[Route('/RepresentedBys', name: 'app_represented_bys')]
-    public function index(Request $request, ResearchCentersRepository $researchCentersRepository, UsersRepository $usersRepository): JsonResponse
+    public function index(
+        Request $request,
+        ResearchCentersRepository $researchCentersRepository,
+        UsersRepository $usersRepository
+        ): JsonResponse
     {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {

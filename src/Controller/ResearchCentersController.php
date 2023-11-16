@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\ResearchCenters;
+use App\Entity\Users;
 use App\Repository\ResearchCentersRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class ResearchCentersController extends AbstractController
 {
     #[Route('/ResearchCenters', name: 'app_researchCenters', methods: ['GET'])]
-    public function index(ResearchCentersRepository $researchCentersRepository, Request $request): JsonResponse
+    public function index(
+        ResearchCentersRepository $researchCentersRepository,
+        Request $request
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
@@ -27,7 +31,6 @@ class ResearchCentersController extends AbstractController
         }
         $researchCentersArray = [];
         foreach ($researchCenters as $researchCenter) {
-            //$user_id = $researchCenter->getAppUser() ? $researchCenter->getAppUser()->getId() : null;
             $researchCentersArray[] = [
                 'id' => $researchCenter->getId(),
                 'label' => $researchCenter->getLibelle(),
@@ -43,7 +46,10 @@ class ResearchCentersController extends AbstractController
     }
 
     #[Route('/ResearchCenters/{id}', name: 'app_ResearchCenters_show', methods: ['GET'])]
-    public function show(ResearchCentersRepository $researchCenterRepository, ResearchCenters $researchCenter): JsonResponse
+    public function show(
+        ResearchCentersRepository $researchCenterRepository,
+        ResearchCenters $researchCenter
+        ): JsonResponse
     {
         $researchCenterArray = [
             'id' => $researchCenter->getId(),
@@ -69,8 +75,10 @@ class ResearchCentersController extends AbstractController
 
     {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+        if (!($token && ($loginUser->getId() === $researchCenter->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
         $data = json_decode($request->getContent(), true);

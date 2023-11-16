@@ -48,20 +48,26 @@ class SearchController extends AbstractController
         if ($category) {
             switch ($category) {
                 case 'searcher':
-                    $results = $this->searchAndWrap($this->researchersRepository, $search, $data['searcher'] ?? [], 'searcher');
+                    $results = $this->searchAndWrap($this->researchersRepository,
+                    $search, $data['searcher'] ?? [], 'searcher');
                     break;
                 case 'research-center':
-                    $results = $this->searchAndWrap($this->researchCentersRepository, $search, $data['research-center'] ?? [], 'research-center');
+                    $results = $this->searchAndWrap($this->researchCentersRepository,
+                    $search, $data['research-center'] ?? [], 'research-center');
                     break;
                 case 'investor':
-                    $results = $this->searchAndWrap($this->investorsRepository, $search, $data['investor'] ?? [], 'investor');
+                    $results = $this->searchAndWrap($this->investorsRepository,
+                    $search, $data['investor'] ?? [], 'investor');
                     break;
             }
         } else {
             $results = array_merge(
-                $this->searchAndWrap($this->researchersRepository, $search, $data['searcher'] ?? [], 'searcher'),
-                $this->searchAndWrap($this->researchCentersRepository, $search, $data['research-center'] ?? [], 'research-center'),
-                $this->searchAndWrap($this->investorsRepository, $search, $data['investor'] ?? [], 'investor')
+                $this->searchAndWrap($this->researchersRepository,
+                $search, $data['searcher'] ?? [], 'searcher'),
+                $this->searchAndWrap($this->researchCentersRepository,
+                $search, $data['research-center'] ?? [], 'research-center'),
+                $this->searchAndWrap($this->investorsRepository,
+                $search, $data['investor'] ?? [], 'investor')
             );
         }
 

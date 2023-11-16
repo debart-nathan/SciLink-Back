@@ -85,11 +85,17 @@ class UsersController extends AbstractController
     }
 
     #[Route('/Users/{id}/patch', name: 'app_users_update', methods: ['PATCH'])]
-    public function update(TokenStorageInterface $tokenStorage, UsersRepository $usersRepository, Users $user, Request $request): JsonResponse
+    public function update(
+        TokenStorageInterface $tokenStorage,
+        UsersRepository $usersRepository,
+        Users $user, Request $request
+        ): JsonResponse
     {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+        if (!($token && ($loginUser->getId() === $user->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
 
