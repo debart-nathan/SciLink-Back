@@ -7,7 +7,7 @@ use App\Repository\UsersRepository;
 use App\Security\Voter\ContactVoter;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,7 +19,6 @@ class UsersController extends AbstractController
     #[Route('/Users', name: 'app_users', methods: ['GET'])]
     public function index(
         ContactVoter $contactVoter,
-        UserInterface $loggedInUser,
         TokenStorageInterface $tokenStorage,
         Request $request,
         UsersRepository $usersRepository
@@ -36,8 +35,8 @@ class UsersController extends AbstractController
         foreach ($users as $user) {
             $privacySecurity = (
                 $token && (
-                    // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-                    (($loggedInUser->getId() === $user->getId())) ||
+                        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                    (($token->getUser()->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
                 )
@@ -56,15 +55,27 @@ class UsersController extends AbstractController
     }
 
     #[Route('/Users/{id}', name: '', methods: ['GET'])]
-    public function show(UsersRepository $usersRepository, Users $user): JsonResponse
-    {
+    public function show(
+        ContactVoter $contactVoter,
+        TokenStorageInterface $tokenStorage,
+        Users $user
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        $privacySecurity = (
+            $token && (
+                    // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                (($token->getUser()->getId() === $user->getId())) ||
+                // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
+                $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
+            )
+        );
         $userArray = [
             'id' => $user->getId(),
             'user_name' => $user->getUserName(),
             'first_name' => $user->getFirstName(),
             'last_name' => $user->getLastName(),
-            'email' => $user->getEmail(),
-            'location_id' => $user->getLocation()->getId(),
+            'email' => $privacySecurity ? $user->getEmail() : null,
+            'location_id' => $user->getLocation() ? $user->getLocation()->getId() : null,
         ];
 
         $userJson = json_encode($userArray);
@@ -72,8 +83,14 @@ class UsersController extends AbstractController
     }
 
     #[Route('/Users/{id}', name: '', methods: ['PATCH'])]
-    public function update(UsersRepository $usersRepository, Users $user, Request $request): JsonResponse
+    public function update(TokenStorageInterface $tokenStorage, UsersRepository $usersRepository, Users $user, Request $request): JsonResponse
     {
+        $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['user_name'])) {

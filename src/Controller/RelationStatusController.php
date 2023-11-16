@@ -7,8 +7,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RelationStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class RelationStatusController extends AbstractController
 {
@@ -46,9 +48,19 @@ class RelationStatusController extends AbstractController
         return new JsonResponse($relationStatusJson, 200, [], true);
     }
 
-    #[Route('/RelationStatus/{id}', name:'app_relation_status_update', methods: ['PATCH'])]
-    public function update(RelationStatusRepository $relationStatusRepository, RelationStatus $relationStatus, Request $request,EntityManagerInterface $entityManager): JsonResponse
-    {
+    #[Route('/RelationStatus/{id}', name: 'app_relation_status_update', methods: ['PATCH'])]
+    public function update(
+        RelationStatusRepository $relationStatusRepository,
+        RelationStatus $relationStatus,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['status'])) {
@@ -57,6 +69,6 @@ class RelationStatusController extends AbstractController
         $entityManager->persist($relationStatus);
         $entityManager->flush();
         $relationStatusJson = json_encode($relationStatus);
-        return new JsonResponse($relationStatusJson,200, [], true);
+        return new JsonResponse($relationStatusJson, 200, [], true);
     }
 }

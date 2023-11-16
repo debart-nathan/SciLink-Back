@@ -7,8 +7,10 @@ use App\Repository\ContactsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class ContactsController extends AbstractController
 {
@@ -54,8 +56,13 @@ class ContactsController extends AbstractController
     }
 
     #[Route('/Contacts/{id}', name: 'app_contacts_update', methods: ['PATCH'])]
-    public function update(ContactsRepository $contactRepository, Contacts $contact, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function update(ContactsRepository $contactRepository, Contacts $contact, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
     {
+        $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['send_date'])) {
