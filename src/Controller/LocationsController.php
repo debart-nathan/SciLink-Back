@@ -6,8 +6,10 @@ use App\Entity\Locations;
 use App\Repository\LocationsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 class LocationsController extends AbstractController
@@ -50,9 +52,16 @@ class LocationsController extends AbstractController
     }
 
 
-    #[Route('/Locations/patch/{id}', name: 'app_locations_update', methods: ['PATCH'])]
-    public function update( Locations $locations, Request $request,EntityManagerInterface $entityManager): JsonResponse
+
+    #[Route('/Locations/{id}/patch', name: 'app_locations_update', methods: ['PATCH'])]
+    public function update( Locations $locations, Request $request,EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+
     {
+        $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
   
         $data = json_decode($request->getContent(), true);
 
