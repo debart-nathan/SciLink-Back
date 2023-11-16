@@ -38,7 +38,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
-    #[ORM\OneToOne(inversedBy: 'users', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'app_user', cascade: ['persist', 'remove'])]
     private ?Researchers $researcher = null;
 
     #[ORM\ManyToMany(targetEntity: ResearchCenters::class, inversedBy: 'users')]
