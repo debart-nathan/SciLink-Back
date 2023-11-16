@@ -47,7 +47,7 @@ class PersonnelsController extends AbstractController
         return new JsonResponse($personnelJson, 200, [], true);
     }
 
-    #[Route('/Personnels/{id}', name: 'app_personnels_update', methods: ['PATCH'])]
+    #[Route('/Personnels/patch/{id}', name: 'app_personnels_update', methods: ['PATCH'])]
     public function update(PersonnelsRepository $personnelRepository, Personnels $personnel, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

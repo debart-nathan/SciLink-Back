@@ -49,7 +49,7 @@ class ManagesController extends AbstractController
         return new JsonResponse($manageJson, 200, [], true);
     }
 
-    #[Route('/Manages/{id}', name: 'app_manages_update', methods: ['PATCH'])]
+    #[Route('/Manages/patch/{id}', name: 'app_manages_update', methods: ['PATCH'])]
     public function update(ManagesRepository $manageRepository, Manages $manage, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

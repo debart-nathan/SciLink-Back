@@ -54,7 +54,7 @@ class UsersController extends AbstractController
         return new JsonResponse($usersJson, 200, [], true);
     }
 
-    #[Route('/Users/{id}', name: '', methods: ['GET'])]
+    #[Route('/Users/{id}', name: 'app_users_show', methods: ['GET'])]
     public function show(
         ContactVoter $contactVoter,
         TokenStorageInterface $tokenStorage,
@@ -82,7 +82,7 @@ class UsersController extends AbstractController
         return new JsonResponse($userJson, 200, [], true);
     }
 
-    #[Route('/Users/{id}', name: '', methods: ['PATCH'])]
+    #[Route('/Users/patch/{id}', name: 'app_users_update', methods: ['PATCH'])]
     public function update(TokenStorageInterface $tokenStorage, UsersRepository $usersRepository, Users $user, Request $request): JsonResponse
     {
         $token = $tokenStorage->getToken();

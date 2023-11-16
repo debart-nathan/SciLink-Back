@@ -46,7 +46,7 @@ class RelationStatusController extends AbstractController
         return new JsonResponse($relationStatusJson, 200, [], true);
     }
 
-    #[Route('/RelationStatus/{id}', name:'app_relation_status_update', methods: ['PATCH'])]
+    #[Route('/RelationStatus/patch/{id}', name:'app_relation_status_update', methods: ['PATCH'])]
     public function update(RelationStatusRepository $relationStatusRepository, RelationStatus $relationStatus, Request $request,EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

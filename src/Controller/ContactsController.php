@@ -53,7 +53,7 @@ class ContactsController extends AbstractController
         return new JsonResponse($contactJson, 200, [], true);
     }
 
-    #[Route('/Contacts/{id}', name: 'app_contacts_update', methods: ['PATCH'])]
+    #[Route('/Contacts/patch/{id}', name: 'app_contacts_update', methods: ['PATCH'])]
     public function update(ContactsRepository $contactRepository, Contacts $contact, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

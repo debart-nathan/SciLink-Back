@@ -57,7 +57,7 @@ class ResearchCentersController extends AbstractController
         return new JsonResponse($researchCenterJson, 200, [], true);
     }
 
-    #[Route('/ResearchCenters/{id}', name: 'app_ResearchCenters_update', methods: ['PATCH'])]
+    #[Route('/ResearchCenters/patch/{id}', name: 'app_ResearchCenters_update', methods: ['PATCH'])]
     public function update(ResearchCentersRepository $researchCenterRepository, ResearchCenters $researchCenter, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);

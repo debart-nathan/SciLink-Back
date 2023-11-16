@@ -50,7 +50,7 @@ class LocationsController extends AbstractController
     }
 
 
-    #[Route('/Locations/{id}', name: 'app_locations_update', methods: ['PATCH'])]
+    #[Route('/Locations/patch/{id}', name: 'app_locations_update', methods: ['PATCH'])]
     public function update( Locations $locations, Request $request,EntityManagerInterface $entityManager): JsonResponse
     {
   
