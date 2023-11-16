@@ -40,6 +40,7 @@ class CustomObjectNormalizer extends ObjectNormalizer
 
             if (isset($context['ignore_user_email_unless_accepted_contact_or_same_user']) && $context['ignore_user_email_unless_accepted_contact_or_same_user']) {
                 $token = $this->tokenStorage->getToken();
+                /** @var Users? $loggedUser */
                 $loggedInUser = $token ? $token->getUser() : null;
                 $privacySecurity = (
                     $token && (
@@ -50,16 +51,19 @@ class CustomObjectNormalizer extends ObjectNormalizer
                 if (!$privacySecurity) {
                     $ignoredAttributes[] = 'email';
                 }
+                if (!($token && $loggedInUser->getId() === $object->getId())){
+                    $ignoredAttributes[] = 'location';
+                }
             }
-            
+
             $context[AbstractObjectNormalizer::IGNORED_ATTRIBUTES] = $ignoredAttributes;
         }
-        $data= parent::normalize($object, $format, $context);
+        $data = parent::normalize($object, $format, $context);
 
         if (!is_array($data) && !($data instanceof \Traversable)) {
             return $data;
         }
-        
+
         $snakeCasedData = [];
         foreach ($data as $key => $value) {
             $snakeCasedKey = lcfirst(preg_replace_callback('/[A-Z]/', function ($matches) {
@@ -67,7 +71,7 @@ class CustomObjectNormalizer extends ObjectNormalizer
             }, $key));
             $snakeCasedData[$snakeCasedKey] = $value;
         }
-    
+
         return $snakeCasedData;
     }
 }

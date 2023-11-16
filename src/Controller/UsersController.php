@@ -33,6 +33,7 @@ class UsersController extends AbstractController
         $token = $tokenStorage->getToken();
         $usersArray = [];
         $privacySecurity = false;
+        $locationPrivacy = false;
         foreach ($users as $user) {
             if ($token) {
                 /** @var Users $loginUser */
@@ -42,9 +43,13 @@ class UsersController extends AbstractController
                     (($loginUser->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
-
+                    
                 );
+
+                $locationPrivacy =(($loginUser->getId() === $user->getId())&&$user->getLocation());
             }
+
+            
 
             $usersArray[] = [
                 'id' => $user->getId(),
@@ -52,7 +57,7 @@ class UsersController extends AbstractController
                 'first_name' => $user->getFirstName(),
                 'last_name' => $user->getLastName(),
                 'email' => $privacySecurity ? $user->getEmail() : null,
-                'location_id' => $user->getLocation() ? $user->getLocation()->getId() : null,
+                'location_id' => $locationPrivacy ? $user->getLocation()->getId() : null,
             ];
         }
         $usersJson = json_encode($usersArray);
