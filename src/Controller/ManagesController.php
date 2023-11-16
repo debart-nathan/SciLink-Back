@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Manages;
+use App\Entity\Users;
 use App\Repository\ManagesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class ManagesController extends AbstractController
 {
     #[Route('/Manages', name: 'app_manages', methods: ['GET'])]
-    public function index(ManagesRepository $managesRepository, Request $request): JsonResponse
+    public function index(
+        ManagesRepository $managesRepository,
+        Request $request
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
@@ -39,7 +43,10 @@ class ManagesController extends AbstractController
     }
 
     #[Route('/Manages/{id}', name: 'app_manages_show', methods: ['GET'])]
-    public function show(ManagesRepository $manageRepository, Manages $manage): JsonResponse
+    public function show(
+        ManagesRepository $manageRepository,
+        Manages $manage
+        ): JsonResponse
     {
         $manageArray = [
             'id' => $manage->getId(),
@@ -53,12 +60,20 @@ class ManagesController extends AbstractController
 
 
     #[Route('/Manages/{id}/patch', name: 'app_manages_update', methods: ['PATCH'])]
-    public function update(ManagesRepository $manageRepository, Manages $manage, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+    public function update(
+        ManagesRepository $manageRepository,
+        Manages $manage,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+        ): JsonResponse
 
     {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+        if (!($token && ($loginUser->getId() === $manage->getPersonnel()->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
         $data = json_decode($request->getContent(), true);

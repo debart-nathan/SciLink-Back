@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Contacts;
+use App\Entity\Users;
 use App\Repository\ContactsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +30,7 @@ class ContactsController extends AbstractController
         foreach ($contacts as $contact) {
             $contactsArray[] = [
                 'id' => $contact->getId(),
-                'send_date' => $contact->getSendDate()->format('d-m-y H:i:s'),
+                'send_date' => $contact->getSendDate()->format('d-m-y//H:i:s'),
                 'object' => $contact->getObject(),
                 'app_user_send_id' => $contact->getAppUserSend()->getId(),
                 'app_user_receive_id' => $contact->getAppUserReceive()->getId(),
@@ -57,30 +58,25 @@ class ContactsController extends AbstractController
 
 
     #[Route('/Contacts/{id}/patch', name: 'app_contacts_update', methods: ['PATCH'])]
-    public function update(ContactsRepository $contactRepository, Contacts $contact, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
-
+    public function update(
+        ContactsRepository $contactRepository,
+        Contacts $contact, Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+        ): JsonResponse
     {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+        if (!($token && ($loginUser->getId() === $contact->getAppUserSend()->getId()))) {
+
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['send_date'])) {
-            $contact->setSendDate($data['send_date']);
-        }
         if (isset($data['object'])) {
             $contact->setObject($data['object']);
-        }
-        if (isset($data['app_user_send_id'])) {
-            $contact->setAppUserSend($data['app_user_send_id']);
-        }
-        if (isset($data['app_user_receive_id'])) {
-            $contact->setAppUserReceive($data['app_user_receive_id']);
-        }
-        if (isset($data['relation_status'])) {
-            $contact->setRelationStatus($data['relation_status']);
         }
 
         $entityManager->persist($contact);

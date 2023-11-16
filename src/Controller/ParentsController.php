@@ -2,26 +2,24 @@
 
 namespace App\Controller;
 
-use App\Entity\ResearchCenters;
 use App\Repository\ResearchCentersRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ParentsController extends AbstractController
 {
     #[Route('/Parents', name: 'app_parents', methods: ['GET'])]
-    public function index(ResearchCentersRepository $researchCentersRepository, Request $request): JsonResponse
+    public function index(
+        ResearchCentersRepository $researchCentersRepository,
+        Request $request
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
-            $queryParams = $request->query->all(); 
+            $queryParams = $request->query->all();
             // Vérifie si l'identifiant du parent est présent dans les paramètres
             if (isset($queryParams['research_center_parent_id'])) {
                 $parentId = $queryParams['research_center_parent_id'];
@@ -74,10 +72,7 @@ class ParentsController extends AbstractController
                 }
             }
         }
-
         $researchCentersJson = json_encode($researchCentersArray);
         return new JsonResponse($researchCentersJson, 200, [], true);
     }
-
-
 }

@@ -14,7 +14,11 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class StudiesController extends AbstractController
 {
     #[Route('/Studies', name: 'app_studies')]
-    public function index(Request $request, ResearchCentersRepository $researchCentersRepository, DomainsRepository $domainsRepository): JsonResponse
+    public function index(
+        Request $request,
+        ResearchCentersRepository $researchCentersRepository,
+        DomainsRepository $domainsRepository
+        ): JsonResponse
     {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {

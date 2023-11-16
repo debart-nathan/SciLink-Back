@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Locations;
+use App\Entity\Users;
 use App\Repository\LocationsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,7 +16,10 @@ use Doctrine\ORM\EntityManagerInterface;
 class LocationsController extends AbstractController
 {
     #[Route('/Locations', name: 'app_locations', methods: ['GET'])]
-    public function index(LocationsRepository $locationsRepository, Request $request): JsonResponse
+    public function index(
+        LocationsRepository $locationsRepository,
+        Request $request
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
@@ -54,12 +58,19 @@ class LocationsController extends AbstractController
 
 
     #[Route('/Locations/{id}/patch', name: 'app_locations_update', methods: ['PATCH'])]
-    public function update( Locations $locations, Request $request,EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+    public function update(
+        Locations $locations,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+        ): JsonResponse
 
     {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+        if (!($token && ($loginUser->getId() === $locations->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
   

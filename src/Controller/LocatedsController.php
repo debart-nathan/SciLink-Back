@@ -7,15 +7,17 @@ use App\Repository\LocationsRepository;
 use App\Repository\ResearchCentersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class LocatedsController extends AbstractController
 {
     #[Route('/Locateds', name: 'app_locateds')]
-    public function index(LocationsRepository $locationsRepository,ResearchCentersRepository $researchCentersRepository, Request $request,): JsonResponse
+    public function index(
+        LocationsRepository $locationsRepository,
+        ResearchCentersRepository $researchCentersRepository,
+        Request $request,
+        ): JsonResponse
     {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
@@ -64,7 +66,6 @@ class LocatedsController extends AbstractController
                     $locatedsArray[] = [
                         'location_id' => $location->getId(),
                         'research_center_id' => $researchCenter->getId(),
-
                     ];
                 }
             }

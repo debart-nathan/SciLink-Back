@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Personnels;
+use App\Entity\Users;
 use App\Repository\PersonnelsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class PersonnelsController extends AbstractController
 {
     #[Route('/Personnels', name: 'app_personnels', methods: ['GET'])]
-    public function index(PersonnelsRepository $personnelsRepository, Request $request): JsonResponse
+    public function index(
+        PersonnelsRepository $personnelsRepository,
+        Request $request
+        ): JsonResponse
     {
         if ($request->query->count() > 0) {
             $queryParams = $request->query->all();
@@ -37,7 +41,10 @@ class PersonnelsController extends AbstractController
     }
 
     #[Route('/Personnels/{id}', name: 'app_personnels_show', methods: ['GET'])]
-    public function show(PersonnelsRepository $personnelRepository, Personnels $personnel): JsonResponse
+    public function show(
+        PersonnelsRepository $personnelRepository,
+        Personnels $personnel
+        ): JsonResponse
     {
         $personnelArray = [
             'id' => $personnel->getId(),
@@ -49,14 +56,21 @@ class PersonnelsController extends AbstractController
         return new JsonResponse($personnelJson, 200, [], true);
     }
 
-
     #[Route('/Personnels/{id}/patch', name: 'app_personnels_update', methods: ['PATCH'])]
-    public function update(PersonnelsRepository $personnelRepository, Personnels $personnel, Request $request, EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage): JsonResponse
+    public function update(
+        PersonnelsRepository $personnelRepository,
+        Personnels $personnel,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+        ): JsonResponse
 
     {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+        if (!($token && ($loginUser->getId() === $personnel->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
         $data = json_decode($request->getContent(), true);

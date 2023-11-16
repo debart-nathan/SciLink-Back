@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\RelationStatus;
+use App\Entity\Users;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RelationStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class RelationStatusController extends AbstractController
 {
     #[Route('/RelationStatus', name: 'app_relation_status', methods: ['GET'])]
-    public function index(RelationStatusRepository $relationStatusRepository, Request $request): JsonResponse
+    public function index(
+        RelationStatusRepository $relationStatusRepository,
+        Request $request
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
@@ -38,7 +42,10 @@ class RelationStatusController extends AbstractController
     }
 
     #[Route('/RelationStatus/{id}', name: 'app_relation_status_show', methods: ['GET'])]
-    public function show(RelationStatusRepository $relationStatusRepository, RelationStatus $relationStatus): JsonResponse
+    public function show(
+        RelationStatusRepository $relationStatusRepository,
+        RelationStatus $relationStatus
+        ): JsonResponse
     {
         $relationStatusArray = [
             'id' => $relationStatus->getId(),
@@ -58,8 +65,10 @@ class RelationStatusController extends AbstractController
         TokenStorageInterface $tokenStorage
     ): JsonResponse {
         $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($token->getUser()->getId() === $user->getId()))) {
+        if (!($token && ($loginUser->getId() === $relationStatus->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
 
