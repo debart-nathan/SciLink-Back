@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Investors;
 use App\Entity\Users;
+use App\Service\ResponseError;
 use App\Repository\InvestorsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,7 +71,8 @@ class InvestorsController extends AbstractController
         InvestorsRepository $investorRepository,
         Investors $investor, Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
         ): JsonResponse
 
     {
@@ -79,7 +81,7 @@ class InvestorsController extends AbstractController
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!($token && ($loginUser->getId() === $investor->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
 
@@ -116,16 +118,16 @@ class InvestorsController extends AbstractController
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
+        ResponseError $responseError,
         TokenStorageInterface $tokenStorage
     ): JsonResponse {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!$token) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-
         
         $data = json_decode($request->getContent(), true);
 
@@ -159,7 +161,8 @@ class InvestorsController extends AbstractController
         InvestorsRepository $investorRepository,
         Investors $investor,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError,
     ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
@@ -167,7 +170,7 @@ class InvestorsController extends AbstractController
 
         // Vérifiez si l'utilisateur connecté a les autorisations nécessaires pour supprimer l'investisseur
         if (!($token && ($loginUser->getId() === $investor->getAppUser()->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
 
         $entityManager->remove($investor);
