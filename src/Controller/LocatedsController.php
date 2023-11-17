@@ -44,7 +44,7 @@ class LocatedsController extends AbstractController
                 ];
             }
         }
-        // Si l'identifiant du locations est spécifié
+        // Si l'identifiant du researchCenter est spécifié
         elseif (isset($researchCenterId)) {
             $researchCenter = $researchCentersRepository->find($researchCenterId);
             $locations = $researchCenter->getLocated();

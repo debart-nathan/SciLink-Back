@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Users;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UsersRepository;
 use App\Security\Voter\ContactVoter;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -32,25 +33,33 @@ class UsersController extends AbstractController
         }
         $token = $tokenStorage->getToken();
         $usersArray = [];
+        $privacySecurity = false;
+        $locationPrivacy = false;
         foreach ($users as $user) {
-             /** @var Users $loginUser */
-            $loginUser = $token->getUser();
-            $privacySecurity = (
-                $token && (
+            if ($token) {
+                /** @var Users $loginUser */
+                $loginUser = $token->getUser();
+                $privacySecurity = (
                     // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-
                     (($loginUser->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
-                )
-            );
+                    
+                );
+
+                $locationPrivacy =(($loginUser->getId() === $user->getId())&&$user->getLocation());
+            }
+
+            
+
             $usersArray[] = [
                 'id' => $user->getId(),
                 'user_name' => $user->getUserName(),
                 'first_name' => $user->getFirstName(),
                 'last_name' => $user->getLastName(),
                 'email' => $privacySecurity ? $user->getEmail() : null,
-                'location_id' => $user->getLocation() ? $user->getLocation()->getId() : null,
+                'location_id' => $locationPrivacy ? $user->getLocation()->getId() : null,
+
             ];
         }
         $usersJson = json_encode($usersArray);
@@ -65,16 +74,18 @@ class UsersController extends AbstractController
         Users $user
     ): JsonResponse {
         $token = $tokenStorage->getToken();
-        /** @var Users $loginUser */
-        $loginUser = $token->getUser();
-        $privacySecurity = (
-            $token && (
+        $privacySecurity=false;
+        if ($token) {
+            /** @var Users $loginUser */
+            $loginUser = $token->getUser();
+            $privacySecurity = (
                 // vérifie que l'utilisateur connecté est l'utilisateur de la donné
                 (($loginUser->getId() === $user->getId())) ||
                 // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                 $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
-            )
-        );
+
+            );
+        }
         $userArray = [
             'id' => $user->getId(),
             'user_name' => $user->getUserName(),
@@ -88,16 +99,17 @@ class UsersController extends AbstractController
         return new JsonResponse($userJson, 200, [], true);
     }
 
+
     #[Route('/Users/{id}/patch', name: 'app_users_update', methods: ['PATCH'])]
     public function update(
         TokenStorageInterface $tokenStorage,
         UsersRepository $usersRepository,
-        Users $user, Request $request
-        ): JsonResponse
-    {
+        Users $user,
+        Request $request
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
-        $loginUser = $token->getUser();
+        $loginUser = $token ? $token->getUser() : null;
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!($token && ($loginUser->getId() === $user->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
@@ -136,5 +148,20 @@ class UsersController extends AbstractController
         $userJson = json_encode($userArray);
 
         return new JsonResponse($userJson, 200, [], true);
+    }
+
+    #[Route('/Users/{id}/delete', name: 'delete_user', methods: ['DELETE'])]
+    public function deleteUser(int $id, EntityManagerInterface $entityManager, UsersRepository $userRepository, Users $user,): JsonResponse
+    {
+
+        $user = $userRepository->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+        $entityManager->remove($user);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'User deleted'], 200);
     }
 }
