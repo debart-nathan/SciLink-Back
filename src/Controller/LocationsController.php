@@ -122,7 +122,7 @@ class LocationsController extends AbstractController
         }
 
         return new JsonResponse(['status' => 'Method not allowed'], 405);
-
+    }
     #[Route('/locations/create', name: 'app_locations_create', methods: ['POST'])]
     public function create(
         Request $request,
@@ -130,10 +130,11 @@ class LocationsController extends AbstractController
         TokenStorageInterface $tokenStorage
     ): JsonResponse
     {
-        $token = $tokenStorage->getToken();
+        //récupérer le jeton d'authentification de l'utilisateur connecté
+        $token = $tokenStorage->getToken();   
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!$token) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);//code HTTP 401 
         }
       
         $data = json_decode($request->getContent(), true);
