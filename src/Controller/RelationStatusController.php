@@ -3,17 +3,23 @@
 namespace App\Controller;
 
 use App\Entity\RelationStatus;
+use App\Entity\Users;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RelationStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class RelationStatusController extends AbstractController
 {
     #[Route('/RelationStatus', name: 'app_relation_status', methods: ['GET'])]
-    public function index(RelationStatusRepository $relationStatusRepository, Request $request): JsonResponse
+    public function index(
+        RelationStatusRepository $relationStatusRepository,
+        Request $request
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
@@ -36,7 +42,10 @@ class RelationStatusController extends AbstractController
     }
 
     #[Route('/RelationStatus/{id}', name: 'app_relation_status_show', methods: ['GET'])]
-    public function show(RelationStatusRepository $relationStatusRepository, RelationStatus $relationStatus): JsonResponse
+    public function show(
+        RelationStatusRepository $relationStatusRepository,
+        RelationStatus $relationStatus
+        ): JsonResponse
     {
         $relationStatusArray = [
             'id' => $relationStatus->getId(),
@@ -46,9 +55,23 @@ class RelationStatusController extends AbstractController
         return new JsonResponse($relationStatusJson, 200, [], true);
     }
 
-    #[Route('/RelationStatus/{id}', name:'app_relation_status_update', methods: ['PATCH'])]
-    public function update(RelationStatusRepository $relationStatusRepository, RelationStatus $relationStatus, Request $request,EntityManagerInterface $entityManager): JsonResponse
-    {
+
+    #[Route('/RelationStatus/{id}/patch', name: 'app_relation_status_update', methods: ['PATCH'])]
+    public function update(
+        RelationStatusRepository $relationStatusRepository,
+        RelationStatus $relationStatus,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!($token && ($loginUser->getId() === $relationStatus->getId()))) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['status'])) {
@@ -57,6 +80,6 @@ class RelationStatusController extends AbstractController
         $entityManager->persist($relationStatus);
         $entityManager->flush();
         $relationStatusJson = json_encode($relationStatus);
-        return new JsonResponse($relationStatusJson,200, [], true);
+        return new JsonResponse($relationStatusJson, 200, [], true);
     }
 }

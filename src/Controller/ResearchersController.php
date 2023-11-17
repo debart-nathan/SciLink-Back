@@ -2,24 +2,39 @@
 
 namespace App\Controller;
 
+use App\Entity\Users;
 use App\Entity\Researchers;
+use App\Repository\UsersRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\ResearchersRepository;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class ResearchersController extends AbstractController
 {
     #[Route('/Researchers', name: 'app_researchers', methods: ['GET'])]
-    public function index(ResearchersRepository $researchersRepository, Request $request): JsonResponse
+    public function index(
+        ResearchersRepository $researchersRepository,
+        Request $request,
+        UsersRepository $usersRepository
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
             $queryParams = $request->query->all();
-            $researchers = $researchersRepository->findBy($queryParams);
+            if (isset($queryParams['app_user'])) {
+                $user = $usersRepository->find($queryParams['app_user']);
+                if (isset($user)) {
+                    $researchers = [$user->getResearcher()];
+                } else {
+                    $researchers = [];
+                }
+            }
         } else {
             $researchers = $researchersRepository->findAll();
         }
@@ -37,7 +52,10 @@ class ResearchersController extends AbstractController
     }
 
     #[Route('/Researchers/{id}', name: 'app_researchers_show', methods: ['GET'])]
-    public function show(ResearchersRepository $researcherRepository, Researchers $researcher): JsonResponse
+    public function show(
+        ResearchersRepository $researcherRepository,
+        Researchers $researcher
+        ): JsonResponse
     {
         $user_id = $researcher->getUser() ? $researcher->getUser()->getId() : null;
         $researcherArray = [
@@ -49,9 +67,23 @@ class ResearchersController extends AbstractController
         return new JsonResponse($researcherJson, 200, [], true);
     }
 
-    #[Route('/Researchers/{id}', name: 'app_researchers_update', methods: ['PATCH'])]
-    public function update(ResearchersRepository $researcherRepository, Researchers $researcher, Request $request,EntityManagerInterface $entityManager): JsonResponse
+
+    #[Route('/Researchers/{id}/patch', name: 'app_researchers_update', methods: ['PATCH'])]
+    public function update(
+        ResearchersRepository $researcherRepository,
+        Researchers $researcher, Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+        ): JsonResponse
+
     {
+        $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!($token && ($loginUser->getId() === $researcher->getUser()->getId()))) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['description'])) {

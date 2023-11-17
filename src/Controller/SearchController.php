@@ -5,7 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\ResearchersRepository;
@@ -17,18 +17,19 @@ class SearchController extends AbstractController
     private $researchersRepository;
     private $researchCentersRepository;
     private $investorsRepository;
-    private $serializer;
+    private $normalizer;
 
     public function __construct(
         ResearchersRepository $researchersRepository,
         ResearchCentersRepository $researchCentersRepository,
         InvestorsRepository $investorsRepository,
-        SerializerInterface $serializer
+        NormalizerInterface $normalizer,
+
     ) {
         $this->researchersRepository = $researchersRepository;
         $this->researchCentersRepository = $researchCentersRepository;
         $this->investorsRepository = $investorsRepository;
-        $this->serializer = $serializer;
+        $this->normalizer = $normalizer;
     }
 
     #[Route('/search', name: 'search', methods: ['GET', 'POST'])]
@@ -47,20 +48,26 @@ class SearchController extends AbstractController
         if ($category) {
             switch ($category) {
                 case 'searcher':
-                    $results = $this->searchAndWrap($this->researchersRepository, $search, $data['searcher'] ?? [], 'searcher');
+                    $results = $this->searchAndWrap($this->researchersRepository,
+                    $search, $data['searcher'] ?? [], 'searcher');
                     break;
                 case 'research-center':
-                    $results = $this->searchAndWrap($this->researchCentersRepository, $search, $data['research-center'] ?? [], 'research-center');
+                    $results = $this->searchAndWrap($this->researchCentersRepository,
+                    $search, $data['research-center'] ?? [], 'research-center');
                     break;
                 case 'investor':
-                    $results = $this->searchAndWrap($this->investorsRepository, $search, $data['investor'] ?? [], 'investor');
+                    $results = $this->searchAndWrap($this->investorsRepository,
+                    $search, $data['investor'] ?? [], 'investor');
                     break;
             }
         } else {
             $results = array_merge(
-                $this->searchAndWrap($this->researchersRepository, $search, $data['searcher'] ?? [], 'searcher'),
-                $this->searchAndWrap($this->researchCentersRepository, $search, $data['research-center'] ?? [], 'research-center'),
-                $this->searchAndWrap($this->investorsRepository, $search, $data['investor'] ?? [], 'investor')
+                $this->searchAndWrap($this->researchersRepository,
+                $search, $data['searcher'] ?? [], 'searcher'),
+                $this->searchAndWrap($this->researchCentersRepository,
+                $search, $data['research-center'] ?? [], 'research-center'),
+                $this->searchAndWrap($this->investorsRepository,
+                $search, $data['investor'] ?? [], 'investor')
             );
         }
 
@@ -72,7 +79,7 @@ class SearchController extends AbstractController
         array_walk($results, function (&$item) {
             unset($item['score']);
         });
-        
+
         return $this->json($results);
     }
 
@@ -99,7 +106,7 @@ class SearchController extends AbstractController
             $score = $this->calculateScore($result, $search, $fieldsToTest);
             $wrappedResults[] = [
                 'category' => $category,
-                'data' => $this->serializer->normalize($result, null, [
+                'data' => $this->normalizer->normalize($result, null, [
                     AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 1,
                     AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object, $format, $context) {
                         if (method_exists($object, 'getId')) {
@@ -107,7 +114,12 @@ class SearchController extends AbstractController
                         }
 
                         return $object;
-                    }
+                    },
+                    'ignore_user_password' => true,
+                    'ignore_user_roles' => true,
+                    'ignore_user_contacts' => true,
+                    'ignore_user_email_unless_accepted_contact_or_same_user' => true,
+
                 ]),
                 'score' => $score,
             ];

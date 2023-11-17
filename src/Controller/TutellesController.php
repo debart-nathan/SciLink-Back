@@ -3,17 +3,23 @@
 namespace App\Controller;
 
 use App\Entity\Tutelles;
+use App\Entity\Users;
 use App\Repository\TutellesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class TutellesController extends AbstractController
 {
     #[Route('/Tutelles', name: 'app_tutelles', methods: ['GET'])]
-    public function index(TutellesRepository $tutellesRepository, Request $request): JsonResponse
+    public function index(
+        TutellesRepository $tutellesRepository,
+        Request $request
+        ): JsonResponse
     {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
@@ -40,7 +46,10 @@ class TutellesController extends AbstractController
     }
 
     #[Route('/Tutelles/{id}', name: 'app_tutelles_show', methods: ['GET'])]
-    public function show(TutellesRepository $tutelleRepository, Tutelles $tutelle): JsonResponse
+    public function show(
+        TutellesRepository $tutelleRepository,
+        Tutelles $tutelle
+        ): JsonResponse
     {
 
         $tutelleArray = [
@@ -56,9 +65,24 @@ class TutellesController extends AbstractController
         return new JsonResponse($tutelleJson, 200, [], true);
     }
 
-    #[Route('/Tutelles/{id}', name: 'app_tutelles_update', methods: ['PATCH'])]
-    public function update(TutellesRepository $tutelleRepository, Tutelles $tutelle, Request $request, EntityManagerInterface $entityManager): JsonResponse
+
+    #[Route('/Tutelles/{id}/patch', name: 'app_tutelles_update', methods: ['PATCH'])]
+    public function update(
+        TutellesRepository $tutelleRepository,
+        Tutelles $tutelle,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+        ): JsonResponse
+
     {
+        $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!($token && ($loginUser->getId() === $tutelle->getInvestor()->getId()))) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['uai'])) {

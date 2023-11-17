@@ -13,7 +13,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class LocatedsController extends AbstractController
 {
     #[Route('/Locateds', name: 'app_locateds')]
-    public function index(LocationsRepository $locationsRepository,ResearchCentersRepository $researchCentersRepository, Request $request,): JsonResponse
+    public function index(
+        LocationsRepository $locationsRepository,
+        ResearchCentersRepository $researchCentersRepository,
+        Request $request,
+        ): JsonResponse
     {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
@@ -62,7 +66,6 @@ class LocatedsController extends AbstractController
                     $locatedsArray[] = [
                         'location_id' => $location->getId(),
                         'research_center_id' => $researchCenter->getId(),
-
                     ];
                 }
             }
