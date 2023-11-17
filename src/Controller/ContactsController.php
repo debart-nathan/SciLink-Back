@@ -71,8 +71,10 @@ class ContactsController extends AbstractController
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($loginUser->getId() === $contact->getAppUserSend()->getId()))) {
-
+        if (!$token ) {
+            return new JsonResponse($responseError);
+        }
+        if($loginUser->getId() !== $contact->getAppUserSend()->getId()){
             return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
@@ -80,7 +82,9 @@ class ContactsController extends AbstractController
         if (isset($data['object'])) {
             $contact->setObject($data['object']);
         }
-
+        if ($loginUser->getId() !== $contact->getId()) {
+            return new JsonResponse($responseError);
+        }
         $entityManager->persist($contact);
         $entityManager->flush();
 
@@ -95,7 +99,7 @@ class ContactsController extends AbstractController
         $contactJson = json_encode($contactArray);
         return new JsonResponse($contactJson, 200, [], true);
     }
-    #[Route('/Contacts/post', name: 'app_contacts_create', methods: ['POST'])]
+    #[Route('/Contacts/create/post', name: 'app_contacts_create', methods: ['POST'])]
     public function create(
         Request $request,
         Contacts $contact,

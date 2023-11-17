@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Personnels;
 use App\Entity\Users;
+use App\Service\ResponseError;
 use App\Repository\PersonnelsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -62,7 +63,8 @@ class PersonnelsController extends AbstractController
         Personnels $personnel,
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
         ): JsonResponse
 
     {
@@ -70,8 +72,11 @@ class PersonnelsController extends AbstractController
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($loginUser->getId() === $personnel->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }
+        if ($loginUser->getId() !== $personnel->getId()){
+            return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
 
@@ -85,6 +90,7 @@ class PersonnelsController extends AbstractController
         $entityManager->persist($personnel);
         $entityManager->flush();
 
+
         $personnelArray = [
             'id' => $personnel->getId(),
             'first_name' => $personnel->getFirstName(),
@@ -93,5 +99,52 @@ class PersonnelsController extends AbstractController
         ];
         $personnelJson = json_encode($personnelArray);
         return new JsonResponse($personnelJson, 200, [], true);
+    }
+    #[Route('/Personnels/create/post', name: 'app_personnels_create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        // Vérifier si l'utilisateur est authentifié
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }//TODO ... finir la verificación de l'utilisateur
+
+        // Créer un nouvel objet Personnels
+        $personnel = new Personnels();
+
+        // Récupérer les données de la requête
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifier les données nécessaires
+        if (!isset($data['first_name']) || !isset($data['last_name'])) {
+            return new JsonResponse(
+                ['error' => 'Les champs first_name et last_name sont requis.'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        // Attribuer les données à l'objet Personnels
+        $personnel->setFirstName($data['first_name']);
+        $personnel->setLastName($data['last_name']);
+
+        // Ajouter le nouvel objet à la base de données
+        $entityManager->persist($personnel);
+        $entityManager->flush();
+
+
+        // Retourner la réponse JSON avec les détails du nouvel objet créé
+        $personnelArray = [
+            'id' => $personnel->getId(),
+            'first_name' => $personnel->getFirstName(),
+            'last_name' => $personnel->getLastName(),
+        ];
+
+        $personnelJson = json_encode($personnelArray);
+
+        return new JsonResponse($personnelJson, Response::HTTP_CREATED, [], true);
     }
 }
