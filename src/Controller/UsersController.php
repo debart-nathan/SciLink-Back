@@ -107,7 +107,6 @@ class UsersController extends AbstractController
         Users $user,
         Request $request
     ): JsonResponse {
-        $security = false
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token ? $token->getUser() : null;
