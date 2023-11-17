@@ -6,10 +6,8 @@ use App\Entity\Domains;
 use App\Repository\DomainsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class DomainsController extends AbstractController
 {
@@ -36,7 +34,10 @@ class DomainsController extends AbstractController
     }
 
     #[Route('/Domains/{id}', name: 'app_domains_show', methods: ['GET'])]
-    public function show(DomainsRepository $domainsRepository, Domains $domain): JsonResponse
+    public function show(
+        DomainsRepository $domainsRepository,
+        Domains $domain
+        ): JsonResponse
     {
         $domainsArray = [
             'id' => $domain->getId(),
