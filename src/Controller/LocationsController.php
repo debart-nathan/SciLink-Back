@@ -62,7 +62,9 @@ class LocationsController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage
-    ): JsonResponse {
+        ): JsonResponse
+    {
+
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -120,5 +122,39 @@ class LocationsController extends AbstractController
         }
 
         return new JsonResponse(['status' => 'Method not allowed'], 405);
+
+    #[Route('/locations/create', name: 'app_locations_create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+    ): JsonResponse
+    {
+        $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!$token) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
+      
+        $data = json_decode($request->getContent(), true);
+
+        $location = new Locations();
+        $location->setAddress($data['address']);
+        $location->setPostalCode($data['postal_code']);
+        $location->setCommune($data['commune']);
+
+
+        $entityManager->persist($location);
+        $entityManager->flush();
+
+        $locationsArray = [
+            'id' => $location->getId(),
+            'address' => $location->getAddress(),
+            'postal_code' => $location->getPostalCode(),
+            'commune' => $location->getCommune(),
+        ];
+        $locationsJson = json_encode($locationsArray);
+        return new JsonResponse($locationsJson, Response::HTTP_CREATED, [], true);
+
     }
 }

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Manages;
 use App\Entity\Users;
 use App\Repository\ManagesRepository;
+use App\Service\ResponseError;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -65,16 +66,22 @@ class ManagesController extends AbstractController
         Manages $manage,
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError,
         ): JsonResponse
 
     {
         $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($loginUser->getId() === $manage->getPersonnel()->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+
+        if (!$loginUser->getId() === $manage->getResearchCenter()->getId()) {
+
+            return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
 
@@ -99,5 +106,46 @@ class ManagesController extends AbstractController
         ];
         $manageJson = json_encode($manageArray);
         return new JsonResponse($manageJson, 200, [], true);
+    }
+
+    #[Route('/Manages', name: 'app_manages_create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+    ): JsonResponse
+    {
+        $token = $tokenStorage->getToken();
+        if (!$token) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+
+        $data = json_decode($request->getContent(), true);
+
+        $manage = new Manages();
+        $manage->setGrade($data['grade']);
+
+        // Assurez-vous d'ajuster cette logique selon vos besoins,
+        //par exemple attribuer le personnel et le centre de recherche appropriés
+        $manage->setPersonnel($data['personnel_id']);
+        $manage->setResearchCenter($data['research_center_id']);
+
+         if (!$loginUser->getId() === $manage->getResearchCenter()->getId()) {
+            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $entityManager->persist($manage);
+        $entityManager->flush();
+
+        $manageArray = [
+            'id' => $manage->getId(),
+            'grade' => $manage->getGrade(),
+            'personnel_id' => $manage->getPersonnel()->getId(),
+            'research_center_id' => $manage->getResearchCenter()->getId(),
+        ];
+        $manageJson = json_encode($manageArray);
+        return new JsonResponse($manageJson, Response::HTTP_CREATED, [], true);
     }
 }
