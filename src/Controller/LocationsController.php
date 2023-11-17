@@ -19,8 +19,7 @@ class LocationsController extends AbstractController
     public function index(
         LocationsRepository $locationsRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -34,7 +33,7 @@ class LocationsController extends AbstractController
             $locationsArray[] = [
                 'id' =>       $location->getId(),
                 'address' =>  $location->getAddress(),
-                'postal_code'  => $location ->getPostalCode(),
+                'postal_code'  => $location->getPostalCode(),
                 'commune' => $location->getCommune(),
             ];
         }
@@ -43,13 +42,13 @@ class LocationsController extends AbstractController
     }
 
     #[Route('/Locations/{id}', name: 'app_locations_show', methods: ['GET'])]
-    public function show( Locations $locations): JsonResponse
+    public function show(Locations $locations): JsonResponse
     {
         $locationsArray = [
-               'id' =>       $locations->getId(),
-               'address' =>  $locations->getAddress(),
-               'postal_code'  => $locations ->getPostalCode(),
-               'commune' => $locations->getCommune(),
+            'id' =>       $locations->getId(),
+            'address' =>  $locations->getAddress(),
+            'postal_code'  => $locations->getPostalCode(),
+            'commune' => $locations->getCommune(),
         ];
         $locationsJson = json_encode($locationsArray);
         return new JsonResponse($locationsJson, 200, [], true);
@@ -65,6 +64,7 @@ class LocationsController extends AbstractController
         TokenStorageInterface $tokenStorage
         ): JsonResponse
     {
+
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -72,7 +72,7 @@ class LocationsController extends AbstractController
         if (!($token && ($loginUser->getId() === $locations->getId()))) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
-  
+
         $data = json_decode($request->getContent(), true);
 
         if (isset($data['address'])) {
@@ -84,23 +84,44 @@ class LocationsController extends AbstractController
         if (isset($data['commune'])) {
             $locations->setCommune($data['commune']);
         }
-      
+
 
         $entityManager->persist($locations);
         $entityManager->flush();
 
- 
+
         $locationsArray = [
             'id' =>       $locations->getId(),
             'address' =>  $locations->getAddress(),
-            'postal_code'  => $locations ->getPostalCode(),
+            'postal_code'  => $locations->getPostalCode(),
             'commune' => $locations->getCommune(),
-         
-            
+
+
         ];
-        $locationsJson = json_encode($locationsArray );
+        $locationsJson = json_encode($locationsArray);
         return new JsonResponse($locationsJson, 200, [], true);
     }
+
+    #[Route('/Locations/{id}/delete', name: 'app_locations_delete', methods: ['DELETE'])]
+    public function deleteLocations(
+        int  $id,
+        Request $request,
+        Locations $location,
+        EntityManagerInterface $entityManager,
+        LocationsRepository $locationsRepository
+         ): JsonResponse
+    {
+        $location = $locationsRepository->find($id);
+ 
+        if ($request->isMethod('DELETE')) {
+           
+            $entityManager->remove($location);
+            $entityManager->flush();
+
+            return new JsonResponse(['status' => 'Location deleted successfully'], 200);
+        }
+
+        return new JsonResponse(['status' => 'Method not allowed'], 405);
 
     #[Route('/locations/create', name: 'app_locations_create', methods: ['POST'])]
     public function create(
@@ -134,5 +155,6 @@ class LocationsController extends AbstractController
         ];
         $locationsJson = json_encode($locationsArray);
         return new JsonResponse($locationsJson, Response::HTTP_CREATED, [], true);
+
     }
 }
