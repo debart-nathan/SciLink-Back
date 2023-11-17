@@ -114,7 +114,7 @@ class InvestorsController extends AbstractController
         return new JsonResponse($investorJson, 200, [], true);
     }
 
-    #[Route('/investors/create', name: 'app_investors_create', methods: ['POST'])]
+    #[Route('/investors/create/post', name: 'app_investors_create', methods: ['POST'])]
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
