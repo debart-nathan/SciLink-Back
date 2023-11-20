@@ -145,7 +145,7 @@ class ResearchersController extends AbstractController
 
         // Attribuer les données à l'objet Researchers
         $researcher->setDescription($data['description']);
-        $researcher->setUser($user);
+        $researcher->setUser($loginUser);
 
         // Ajouter le nouvel objet à la base de données
         $entityManager->persist($researcher);
@@ -164,9 +164,12 @@ class ResearchersController extends AbstractController
     }
 
     #[Route('/Researchers/{id}/delete', name: 'delete_researcher', methods: ['DELETE'])]
-    public function deleteRechercher(int $id, EntityManagerInterface $entityManager, Researchers $researcher,ResearchersRepository $researcherRepository,): JsonResponse
+    public function deleteRechercher(
+        int $id, EntityManagerInterface $entityManager,
+        Researchers $researcher,
+        ResearchersRepository $researcherRepository
+        ): JsonResponse
 {
-
         $researcher = $researcherRepository->find($id);
         if (!$researcher) {
             throw $this->createNotFoundException('User not found');

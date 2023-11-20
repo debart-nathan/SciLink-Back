@@ -15,9 +15,21 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class TutellesController extends AbstractController
 {
+    private $authorizationChecker;
+    private $tokenStorage;
+    public function __construct(
+        AuthorizationCheckerInterface $authorizationChecker,
+        TokenStorageInterface $tokenStorage
+        )
+    {
+        $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage = $tokenStorage;
+    }
+
     #[Route('/Tutelles', name: 'app_tutelles', methods: ['GET'])]
     public function index(
         TutellesRepository $tutellesRepository,
@@ -129,18 +141,17 @@ class TutellesController extends AbstractController
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError,
         InvestorsRepository $investorsRepository,
-        ResearchCentersRepository $researchCentersRepository
+        ResearchCentersRepository $researchCentersRepository,
+
+
     ): JsonResponse {
-        $token = $tokenStorage->getToken();
+        
         // Vérifier si l'utilisateur est authentifié
-        if (!$token) {
+        
+        $user = $this->tokenStorage->getToken()->getUser();
+        if (!$this->authorizationChecker->isGranted('ROLE_ADMIN', $user)) {
             return new JsonResponse($responseError);
         }
-
-        /** @var Users $loginUser */
-        $loginUser = $token->getUser();
-        //todo : finire la verification du login
-
         // Récupérer les données de la requête
         $data = json_decode($request->getContent(), true);
 
