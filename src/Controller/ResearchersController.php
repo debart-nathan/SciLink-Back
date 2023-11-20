@@ -105,16 +105,16 @@ class ResearchersController extends AbstractController
 
 
     #[Route('/Researchers/{id}/delete', name: 'delete_researcher', methods: ['DELETE'])]
-    public function deleteRechercher(int $id, EntityManagerInterface $entityManager, Researchers $researcher,ResearchersRepository $researcherRepository,): JsonResponse
+    public function deleteRechercher(int $id, EntityManagerInterface $entityManager, Researchers $researcher,ResearchersRepository $researcherRepository): JsonResponse
 {
 
         $researcher = $researcherRepository->find($id);
         if (!$researcher) {
-            throw $this->createNotFoundException('User not found');
+            throw $this->createNotFoundException('Researcher not found');
         }
         $entityManager->remove($researcher);
         $entityManager->flush();
 
-        return new JsonResponse(['status' => 'researcher deleted'], 200);
+        return new JsonResponse(['status' => 'Researcher deleted'], 200);
 }
 }

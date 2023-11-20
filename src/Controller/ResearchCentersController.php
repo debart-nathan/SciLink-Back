@@ -6,6 +6,7 @@ use App\Entity\ResearchCenters;
 use App\Entity\Users;
 use App\Repository\ResearchCentersRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpParser\Builder\Method;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -119,4 +120,21 @@ class ResearchCentersController extends AbstractController
         $researchCenterJson = json_encode($researchCenterArray);
         return new JsonResponse($researchCenterJson, 200, [], true);
     }
+
+    #[Route('/ReseachCenters/{id}delete', name: 'delete_reseachCenter', Method: ['DELETE'])]
+    public function deleteRrseachCenter(int $id, EntityManagerInterface $entityManager,ResearchCentersRepository $researchCentersRepository, ResearchCenters $researchCenter){
+
+        $researchCenter = $researchCentersRepository->find($id);
+
+        if(!$researchCenter){
+
+            throw $this->createNotFoundException('ReseachCenter not found');
+
+        }
+        $entityManager->Persist($researchCenter);
+        $entityManager->flush();
+    
+        return new JsonResponse(['Status' => 'ReseachCenter '], 200);
+    }
+   
 }

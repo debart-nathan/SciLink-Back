@@ -156,26 +156,42 @@ class InvestorsController extends AbstractController
         return new JsonResponse($investorJson, Response::HTTP_CREATED, [], true);
     }
 
-    #[Route('/investors/{id}/delete', name: 'app_investors_delete', methods: ['DELETE'])]
-    public function delete(
-        InvestorsRepository $investorRepository,
-        Investors $investor,
-        EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage,
-        ResponseError $responseError,
-    ): JsonResponse {
-        $token = $tokenStorage->getToken();
-        /** @var Users $loginUser */
-        $loginUser = $token->getUser();
+    // #[Route('/investors/{id}/delete', name: 'app_investors_delete', methods: ['DELETE'])]
+    // public function delete(
+    //     InvestorsRepository $investorRepository,
+    //     Investors $investor,
+    //     EntityManagerInterface $entityManager,
+    //     TokenStorageInterface $tokenStorage,
+    //     ResponseError $responseError,
+    // ): JsonResponse {
+    //     $token = $tokenStorage->getToken();
+    //     /** @var Users $loginUser */
+    //     $loginUser = $token->getUser(); // TODO
 
-        // Vérifiez si l'utilisateur connecté a les autorisations nécessaires pour supprimer l'investisseur
-        if (!($token && ($loginUser->getId() === $investor->getAppUser()->getId()))) {
-            return new JsonResponse($responseError);
+    //     // Vérifiez si l'utilisateur connecté a les autorisations nécessaires pour supprimer l'investisseur
+    //     if (!($token && ($loginUser->getId() === $investor->getAppUser()->getId()))) {
+    //         return new JsonResponse($responseError);
+    //     }
+
+    //     $entityManager->remove($investor);
+    //     $entityManager->flush();
+
+    //     return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    // }
+
+
+    #[Route('/Investors/{id}/delete', name: 'delete_investor', methods: ['DELETE'])]
+    public function deleteInvestor(int $id, EntityManagerInterface $entityManager,  InvestorsRepository $investorRepository,TokenStorageInterface $tokenStorage, Investors $investor): JsonResponse
+    {
+        // $token = $tokenStorage->getToken();
+        $investor = $investorRepository->find($id);
+
+        if (!$investor) {
+            throw $this->createNotFoundException('Investor not found');
         }
-
         $entityManager->remove($investor);
         $entityManager->flush();
 
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(['status' => 'Investor deleted'], 200);
     }
 }

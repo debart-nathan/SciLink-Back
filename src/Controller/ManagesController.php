@@ -148,4 +148,19 @@ class ManagesController extends AbstractController
         $manageJson = json_encode($manageArray);
         return new JsonResponse($manageJson, Response::HTTP_CREATED, [], true);
     }
+
+    #[Route('/Manages/{id}/delete', name: 'delete_manage', methods: ['DELETE'])]
+    public function deleteManage(int $id, EntityManagerInterface $entityManager, ManagesRepository $managesRepository,Manages $manage): JsonResponse
+    {
+
+        $manage = $managesRepository->find($id);
+
+        if (!$manage) {
+            throw $this->createNotFoundException('Manage not found');
+        }
+        $entityManager->remove($manage);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Manage deleted'], 200);
+    }
 }

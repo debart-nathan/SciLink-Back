@@ -140,4 +140,20 @@ class ContactsController extends AbstractController
         $contactJson = json_encode($contactArray);
         return new JsonResponse($contactJson, 200, [], true);
     }
+
+
+    #[Route('/Contacts/{id}/delete', name: 'delete_contact', methods: ['DELETE'])]
+    public function deleteContact(int $id, EntityManagerInterface $entityManager, ContactsRepository $contactsRepository, Contacts $contact): JsonResponse
+    {
+
+        $contact = $contactsRepository->find($id);
+
+        if (!$contact) {
+            throw $this->createNotFoundException('Contact not found');
+        }
+        $entityManager->remove($contact);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Contact deleted'], 200);
+    }
 }

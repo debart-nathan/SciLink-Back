@@ -158,4 +158,20 @@ class LocationsController extends AbstractController
         return new JsonResponse($locationsJson, Response::HTTP_CREATED, [], true);
 
     }
+    #[Route('/Locations/{id}/delete', name: 'delete_locations', methods: ['DELETE'])]
+    public function deleteLocation(int $id, EntityManagerInterface $entityManager, LocationsRepository $locationsRepository,Locations $location ): JsonResponse
+    {
+
+        $location = $locationsRepository->find($id);
+
+        if (!$location) {
+            throw $this->createNotFoundException('Location not found');
+        }
+        $entityManager->remove($location);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Locations deleted'], 200);
+    }
+
+
 }

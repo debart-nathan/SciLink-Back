@@ -117,4 +117,21 @@ class TutellesController extends AbstractController
         $tutelleJson = json_encode($tutelleArray);
         return new JsonResponse($tutelleJson, 200, [], true);
     }
+
+    #[Route('/Tutelles/{id}/delete', name: 'delete_tutelle', methods: ['DELETE'])]
+    public function deleteTutelle(int $id, EntityManagerInterface $entityManager, TutellesRepository $tutellesRepository, Tutelles $tutelle): JsonResponse
+    {
+      
+        $tutelle = $tutellesRepository->find($id);
+
+        if (!$tutelle) {
+            throw $this->createNotFoundException('Tutelle not found');
+        }
+      
+        $entityManager->remove($tutelle);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Tutelle deleted'], 200);
+    }
+
 }

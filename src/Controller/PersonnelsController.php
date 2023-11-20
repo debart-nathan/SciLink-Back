@@ -94,4 +94,20 @@ class PersonnelsController extends AbstractController
         $personnelJson = json_encode($personnelArray);
         return new JsonResponse($personnelJson, 200, [], true);
     }
+
+    #[Route('/Personnels/{id}/delete', name: 'delete_personnel', methods: ['DELETE'])]
+    public function deletePersonnel(int $id, EntityManagerInterface $entityManager, PersonnelsRepository $personnelsRepository, Personnels $personnel): JsonResponse
+    {
+
+        $personnel = $personnelsRepository->find($id);
+
+        if (!$personnel) {
+            throw $this->createNotFoundException('Personnel not found');
+        }
+        $entityManager->remove($personnel);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Personnel deleted'], 200);
+    }
+
 }
