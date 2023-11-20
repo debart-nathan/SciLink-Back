@@ -2,20 +2,30 @@
 
 namespace App\Controller;
 
-use App\Entity\RelationStatus;
 use App\Entity\Users;
+use App\Entity\RelationStatus;
 use App\Service\ResponseError;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RelationStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class RelationStatusController extends AbstractController
 {
+    private $authorizationChecker;
+    private $tokenStorage;
+    public function __construct(
+        AuthorizationCheckerInterface $authorizationChecker,
+        TokenStorageInterface $tokenStorage
+    ) {
+        $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage = $tokenStorage;
+    }
     #[Route('/RelationStatus', name: 'app_relation_status', methods: ['GET'])]
     public function index(
         RelationStatusRepository $relationStatusRepository,
