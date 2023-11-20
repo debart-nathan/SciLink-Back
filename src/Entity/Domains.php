@@ -11,9 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 class Domains
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(length: 255)]
+    private ?string $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
@@ -33,6 +32,12 @@ class Domains
     public function getId(): ?int
     {
         return $this->id;
+    }
+    public function setId(string $id): static
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getName(): ?string
