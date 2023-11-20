@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Users;
 use App\Entity\Researchers;
+use App\Service\ResponseError;
 use App\Repository\UsersRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\ResearchersRepository;
@@ -73,7 +74,8 @@ class ResearchersController extends AbstractController
         ResearchersRepository $researcherRepository,
         Researchers $researcher, Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
         ): JsonResponse
 
     {
@@ -82,7 +84,7 @@ class ResearchersController extends AbstractController
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!($token && ($loginUser->getId() === $researcher->getUser()->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
 
@@ -103,6 +105,63 @@ class ResearchersController extends AbstractController
         return new JsonResponse($researcherJson, 200, [], true);
     }
 
+    #[Route('/Researchers/create/post', name: 'app_researchers_create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError,
+        UsersRepository $usersRepository
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        // Vérifier si l'utilisateur est authentifié
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }
+
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+
+        // Récupérer les données de la requête
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifier les données nécessaires
+        if (!isset($data['description']) || !isset($data['user_id'])) {
+            return new JsonResponse(
+                ['error' => 'La description et l\'ID utilisateur sont requis.']
+                , Response::HTTP_BAD_REQUEST);
+        }
+
+        // Vérifier si l'utilisateur existe
+        $user = $usersRepository->find($data['user_id']);
+        if (!$user) {
+            return new JsonResponse(
+                ['error' => 'L\'utilisateur fourni n\'existe pas.']
+                , Response::HTTP_NOT_FOUND);
+        }
+
+        // Créer un nouvel objet Researchers
+        $researcher = new Researchers();
+
+        // Attribuer les données à l'objet Researchers
+        $researcher->setDescription($data['description']);
+        $researcher->setUser($user);
+
+        // Ajouter le nouvel objet à la base de données
+        $entityManager->persist($researcher);
+        $entityManager->flush();
+
+        // Retourner la réponse JSON avec les détails du nouvel objet créé
+        $researcherArray = [
+            'id' => $researcher->getId(),
+            'description' => $researcher->getDescription(),
+            'user_id' => $user->getId(),
+        ];
+
+        $researcherJson = json_encode($researcherArray);
+
+        return new JsonResponse($researcherJson, Response::HTTP_CREATED, [], true);
+    }
 
     #[Route('/Researchers/{id}/delete', name: 'delete_researcher', methods: ['DELETE'])]
     public function deleteRechercher(int $id, EntityManagerInterface $entityManager, Researchers $researcher,ResearchersRepository $researcherRepository,): JsonResponse
@@ -117,4 +176,5 @@ class ResearchersController extends AbstractController
 
         return new JsonResponse(['status' => 'researcher deleted'], 200);
 }
+
 }

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\RelationStatus;
 use App\Entity\Users;
+use App\Service\ResponseError;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RelationStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -62,14 +63,18 @@ class RelationStatusController extends AbstractController
         RelationStatus $relationStatus,
         Request $request,
         EntityManagerInterface $entityManager,
+        ResponseError $responseError,
         TokenStorageInterface $tokenStorage
     ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($loginUser->getId() === $relationStatus->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }
+        if($loginUser->getId() !== $relationStatus->getId()){
+            return new JsonResponse($responseError);
         }
 
         $data = json_decode($request->getContent(), true);
@@ -81,5 +86,47 @@ class RelationStatusController extends AbstractController
         $entityManager->flush();
         $relationStatusJson = json_encode($relationStatus);
         return new JsonResponse($relationStatusJson, 200, [], true);
+    }
+    #[Route('/RelationStatus/create/post', name: 'app_relation_status_create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        // Vérifier si l'utilisateur est authentifié
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }
+        //todo verifier que l'utilisateur est le propriétaire de la donnée
+
+        // Créer un nouvel objet RelationStatus
+        $relationStatus = new RelationStatus();
+
+        // Récupérer les données de la requête
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifier les données nécessaires
+        if (!isset($data['status'])) {
+            return new JsonResponse(['error' => 'Le champ status est requis.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Attribuer les données à l'objet RelationStatus
+        $relationStatus->setStatus($data['status']);
+
+        // Ajouter le nouvel objet à la base de données
+        $entityManager->persist($relationStatus);
+        $entityManager->flush();
+
+        // Retourner la réponse JSON avec les détails du nouvel objet créé
+        $relationStatusArray = [
+            'id' => $relationStatus->getId(),
+            'status' => $relationStatus->getStatus(),
+        ];
+
+        $relationStatusJson = json_encode($relationStatusArray);
+
+        return new JsonResponse($relationStatusJson, Response::HTTP_CREATED, [], true);
     }
 }

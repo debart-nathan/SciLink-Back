@@ -2,13 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\Tutelles;
 use App\Entity\Users;
+use App\Entity\Tutelles;
+use App\Service\ResponseError;
 use App\Repository\TutellesRepository;
+use App\Repository\InvestorsRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\ResearchCentersRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -72,7 +75,8 @@ class TutellesController extends AbstractController
         Tutelles $tutelle,
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
         ): JsonResponse
 
     {
@@ -81,7 +85,7 @@ class TutellesController extends AbstractController
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!($token && ($loginUser->getId() === $tutelle->getInvestor()->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
 
@@ -117,4 +121,84 @@ class TutellesController extends AbstractController
         $tutelleJson = json_encode($tutelleArray);
         return new JsonResponse($tutelleJson, 200, [], true);
     }
+
+    #[Route('/Tutelles/create/post', name: 'app_tutelles_create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError,
+        InvestorsRepository $investorsRepository,
+        ResearchCentersRepository $researchCentersRepository
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        // Vérifier si l'utilisateur est authentifié
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }
+
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        //todo : finire la verification du login
+
+        // Récupérer les données de la requête
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifier les données nécessaires
+        if (
+            !isset($data['uai']) ||
+            !isset($data['siret']) ||
+            !isset($data['type']) ||
+            !isset($data['investor_id']) ||
+            !isset($data['research_center_id'])
+            ) {
+            return new JsonResponse(['error' => 'Tous les champs sont requis.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Vérifier si l'investisseur existe
+        $investor = $investorsRepository->find($data['investor_id']);
+        if (!$investor) {
+            return new JsonResponse(
+                ['error' => 'L\'investisseur avec l\'ID fourni n\'existe pas.'],
+                Response::HTTP_NOT_FOUND);
+        }
+
+        // Vérifier si le centre de recherche existe
+        $researchCenter = $researchCentersRepository->find($data['research_center_id']);
+        if (!$researchCenter) {
+            return new JsonResponse(
+                ['error' => 'Le centre de recherche avec l\'ID fourni n\'existe pas.'],
+                Response::HTTP_NOT_FOUND);
+        }
+
+        // Créer un nouvel objet Tutelles
+        $tutelle = new Tutelles();
+
+        // Attribuer les données à l'objet Tutelles
+        $tutelle->setUai($data['uai']);
+        $tutelle->setSiret($data['siret']);
+        $tutelle->setType($data['type']);
+        $tutelle->setInvestor($investor);
+        $tutelle->setResearchCenter($researchCenter);
+
+        // Ajouter le nouvel objet à la base de données
+        $entityManager->persist($tutelle);
+        $entityManager->flush();
+
+        // Retourner la réponse JSON avec les détails du nouvel objet créé
+        $tutelleArray = [
+            'id' => $tutelle->getId(),
+            'uai' => $tutelle->getUai(),
+            'siret' => $tutelle->getSiret(),
+            'type' => $tutelle->getType(),
+            'investor_id' => $investor->getId(),
+            'research_center_id' => $researchCenter->getId(),
+        ];
+
+        $tutelleJson = json_encode($tutelleArray);
+
+        return new JsonResponse($tutelleJson, Response::HTTP_CREATED, [], true);
+    }
+
+
 }
