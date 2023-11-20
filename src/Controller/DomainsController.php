@@ -4,12 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Domains;
 use App\Repository\DomainsRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class DomainsController extends AbstractController
 {
@@ -36,7 +35,10 @@ class DomainsController extends AbstractController
     }
 
     #[Route('/Domains/{id}', name: 'app_domains_show', methods: ['GET'])]
-    public function show(DomainsRepository $domainsRepository, Domains $domain): JsonResponse
+    public function show(
+        DomainsRepository $domainsRepository,
+        Domains $domain
+        ): JsonResponse
     {
         $domainsArray = [
             'id' => $domain->getId(),
@@ -44,5 +46,32 @@ class DomainsController extends AbstractController
         ];
         $domainsJson = json_encode($domainsArray);
         return new JsonResponse($domainsJson, 200, [], true);
+    }
+    #[Route('/Domains/create/post', name: 'app_domains_create', methods: ['POST'])]
+    public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // Validate that the required data is present
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Create a new Domains entity
+        $domain = new Domains();
+        $domain->setName($data['name']);
+
+        // Persist the new entity to the database
+        $entityManager->persist($domain);
+        $entityManager->flush();
+
+        // Return the newly created domain in the response
+        $domainArray = [
+            'id' => $domain->getId(),
+            'name' => $domain->getName(),
+        ];
+        $domainJson = json_encode($domainArray);
+
+        return new JsonResponse($domainJson, JsonResponse::HTTP_CREATED, [], true);
     }
 }

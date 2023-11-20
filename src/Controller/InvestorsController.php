@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Investors;
 use App\Entity\Users;
+use App\Service\ResponseError;
 use App\Repository\InvestorsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,7 +71,8 @@ class InvestorsController extends AbstractController
         InvestorsRepository $investorRepository,
         Investors $investor, Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
         ): JsonResponse
 
     {
@@ -79,7 +81,7 @@ class InvestorsController extends AbstractController
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!($token && ($loginUser->getId() === $investor->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
 
@@ -110,5 +112,70 @@ class InvestorsController extends AbstractController
         ];
         $investorJson = json_encode($investorArray);
         return new JsonResponse($investorJson, 200, [], true);
+    }
+
+    #[Route('/investors/create/post', name: 'app_investors_create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ResponseError $responseError,
+        TokenStorageInterface $tokenStorage
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+        if (!$token) {
+            return new JsonResponse($responseError);
+        }
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        
+        $data = json_decode($request->getContent(), true);
+
+        $investor = new Investors();
+        $investor->setName($data['name']);
+        $investor->setSigle($data['sigle']);
+        $investor->setType($data['type']);
+        $investor->setLabel($data['label']);
+
+        $investor->setAppUser($loginUser);
+
+        $entityManager->persist($investor);
+        $entityManager->flush();
+
+        $user_id = $investor->getAppUser() ? $investor->getAppUser()->getId() : null;
+        $investorArray = [
+            'id' => $investor->getId(),
+            'name' => $investor->getName(),
+            'sigle' => $investor->getSigle(),
+            'type' => $investor->getType(),
+            'label' => $investor->getLabel(),
+            'app_user_id' => $user_id,
+        ];
+        $investorJson = json_encode($investorArray);
+
+        return new JsonResponse($investorJson, Response::HTTP_CREATED, [], true);
+    }
+
+    #[Route('/investors/{id}/delete', name: 'app_investors_delete', methods: ['DELETE'])]
+    public function delete(
+        InvestorsRepository $investorRepository,
+        Investors $investor,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError,
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+
+        // Vérifiez si l'utilisateur connecté a les autorisations nécessaires pour supprimer l'investisseur
+        if (!($token && ($loginUser->getId() === $investor->getAppUser()->getId()))) {
+            return new JsonResponse($responseError);
+        }
+
+        $entityManager->remove($investor);
+        $entityManager->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }
