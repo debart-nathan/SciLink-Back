@@ -132,14 +132,13 @@ class TutellesController extends AbstractController
         ResearchCentersRepository $researchCentersRepository
     ): JsonResponse {
         $token = $tokenStorage->getToken();
-        // Vérifier si l'utilisateur est authentifié
-        if (!$token) {
-            return new JsonResponse($responseError);
-        }
-
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-        //todo : finire la verification du login
+        // Check if the user is an admin
+        if (!in_array('ROLE_ADMIN', $loginUser->getRoles())) {
+            return new JsonResponse($responseError);
+        }
+    
 
         // Récupérer les données de la requête
         $data = json_decode($request->getContent(), true);
