@@ -5,31 +5,33 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\ResearchersRepository;
 use App\Repository\ResearchCentersRepository;
 use App\Repository\InvestorsRepository;
+use App\Security\Voter\ContactVoter;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class SearchController extends AbstractController
 {
     private $researchersRepository;
     private $researchCentersRepository;
     private $investorsRepository;
-    private $normalizer;
+    private $tokenStorage;
+    private $contactVoter;
 
     public function __construct(
         ResearchersRepository $researchersRepository,
         ResearchCentersRepository $researchCentersRepository,
         InvestorsRepository $investorsRepository,
-        NormalizerInterface $normalizer,
-
+        TokenStorageInterface $tokenStorage,
+        ContactVoter $contactVoter
     ) {
         $this->researchersRepository = $researchersRepository;
         $this->researchCentersRepository = $researchCentersRepository;
         $this->investorsRepository = $investorsRepository;
-        $this->normalizer = $normalizer;
+        $this->tokenStorage = $tokenStorage;
+        $this->contactVoter = $contactVoter;
     }
 
     #[Route('/search', name: 'search', methods: ['GET', 'POST'])]
@@ -43,37 +45,83 @@ class SearchController extends AbstractController
         $category = $data['category'] ?? null;
         $search = $data['search'] ?? null;
 
+        // Get page and limit from data, default to 1 and 10 respectively if not provided
+        $page = $data['page'] ?? 1;
+        $limit = $data['limit'] ?? 10;
+
+        // Calculate the offset based on the page number and limit
+        $offset = ($page - 1) * $limit;
         $results = [];
+
 
         if ($category) {
             switch ($category) {
                 case 'searcher':
-                    $results = $this->searchAndWrap($this->researchersRepository,
-                    $search, $data['searcher'] ?? [], 'searcher');
+                    $results = $this->searchAndWrap(
+                        $this->researchersRepository,
+                        $search,
+                        $data['searcher'] ?? [],
+                        'searcher',
+                        $offset,
+                        $limit
+                    );
                     break;
                 case 'research-center':
-                    $results = $this->searchAndWrap($this->researchCentersRepository,
-                    $search, $data['research-center'] ?? [], 'research-center');
+                    $results = $this->searchAndWrap(
+                        $this->researchCentersRepository,
+                        $search,
+                        $data['research-center'] ?? [],
+                        'research-center',
+                        $offset,
+                        $limit
+                    );
                     break;
                 case 'investor':
-                    $results = $this->searchAndWrap($this->investorsRepository,
-                    $search, $data['investor'] ?? [], 'investor');
+                    $results = $this->searchAndWrap(
+                        $this->investorsRepository,
+                        $search,
+                        $data['investor'] ?? [],
+                        'investor',
+                        $offset,
+                        $limit
+                    );
                     break;
             }
         } else {
+
             $results = array_merge(
-                $this->searchAndWrap($this->researchersRepository,
-                $search, $data['searcher'] ?? [], 'searcher'),
-                $this->searchAndWrap($this->researchCentersRepository,
-                $search, $data['research-center'] ?? [], 'research-center'),
-                $this->searchAndWrap($this->investorsRepository,
-                $search, $data['investor'] ?? [], 'investor')
+                $this->searchAndWrap(
+                    $this->researchersRepository,
+                    $search,
+                    $data['searcher'] ?? [],
+                    'searcher',
+                    $offset,
+                    $limit
+                ),
+                $this->searchAndWrap(
+                    $this->researchCentersRepository,
+                    $search,
+                    $data['research-center'] ?? [],
+                    'research-center',
+                    $offset,
+                    $limit
+                ),
+                $this->searchAndWrap(
+                    $this->investorsRepository,
+                    $search,
+                    $data['investor'] ?? [],
+                    'investor',
+                    $offset,
+                    $limit
+                )
             );
         }
+
 
         usort($results, function ($a, $b) {
             return $b['score'] - $a['score'];
         });
+        $results = array_slice($results, 0, $limit);
 
         // Remove the score from the results before returning
         array_walk($results, function (&$item) {
@@ -83,9 +131,10 @@ class SearchController extends AbstractController
         return $this->json($results);
     }
 
-    private function searchAndWrap($repository, $search, $additionalData, $category)
+    private function searchAndWrap($repository, $search, $additionalData, $category, $offset, $limit)
     {
-        $results = $repository->search($search, $additionalData);
+
+        $results = $repository->search($search, $additionalData, $offset, $limit);
         $wrappedResults = [];
 
         // Define the fields to be tested for each category
@@ -106,26 +155,64 @@ class SearchController extends AbstractController
             $score = $this->calculateScore($result, $search, $fieldsToTest);
             $wrappedResults[] = [
                 'category' => $category,
-                'data' => $this->normalizer->normalize($result, null, [
-                    AbstractNormalizer::CIRCULAR_REFERENCE_LIMIT => 1,
-                    AbstractNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object, $format, $context) {
-                        if (method_exists($object, 'getId')) {
-                            return $object->getId();
-                        }
-
-                        return $object;
-                    },
-                    'ignore_user_password' => true,
-                    'ignore_user_roles' => true,
-                    'ignore_user_contacts' => true,
-                    'ignore_user_email_unless_accepted_contact_or_same_user' => true,
-
-                ]),
+                'data' => $this->createDataArray($result, $category),
                 'score' => $score,
             ];
         }
 
         return $wrappedResults;
+    }
+    private function createDataArray($object, $category)
+    {
+
+
+        switch ($category) {
+            case 'searcher':
+                $token = $this->tokenStorage->getToken();
+                $user = $object->getUser();
+                if ($token) {
+                    /** @var Users $loginUser */
+                    $loginUser = $token->getUser();
+                    $privacySecurity = (
+                        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                        (($loginUser->getId() === $user->getId())) ||
+                        // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
+                        $this->contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
+
+                    );
+                }
+                return [
+                    "id" => $object->getId(),
+                    "user" => [
+                        'id' => $user->getId(),
+                        'user_name' => $user->getUserName(),
+                        'first_name' => $user->getFirstName(),
+                        'last_name' => $user->getLastName(),
+                        'email' =>  $privacySecurity ? $user->getEmail() : null,
+                    ]
+                    // add other fields as needed
+                ];
+            case 'research-center':
+                return [
+                    'id' => $object->getId(),
+                    'label' => $object->getLibelle(),
+                    'sigle' => $object->getSigle(),
+                    'founding_year' => $object->getFoundingYear(),
+                    'is_active' => $object->isIsActive(),
+                    'website' => $object->getWebsite(),
+                    'fiche_msr' => $object->getFicheMsr()
+                ];
+            case 'investor':
+                return [
+                    'id' => $object->getId(),
+                    'name' => $object->getName(),
+                    'sigle' => $object->getSigle(),
+                    'type' => $object->getType(),
+                    'label' => $object->getLabel()
+                ];
+            default:
+                throw new \Exception("Unknown category: $category");
+        }
     }
 
     private function calculateScore($item, $search, $fieldsToTest)
@@ -151,7 +238,7 @@ class SearchController extends AbstractController
             $score = 0;
 
             // Check if the attribute value contains the search string
-            if (strpos($attribute, $search) !== false) {
+            if ($attribute !== null && $search !== null && strpos($attribute, $search) !== false) {
                 // Calculate the proportion of the search string in the attribute value
                 $proportion = strlen($search) / strlen($attribute);
                 $score += $proportion;

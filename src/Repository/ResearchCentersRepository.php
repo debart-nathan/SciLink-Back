@@ -21,7 +21,7 @@ class ResearchCentersRepository extends ServiceEntityRepository
         parent::__construct($registry, ResearchCenters::class);
     }
 
-    public function search($search, $additionalData)
+    public function search($search, $additionalData, $offset = 0, $limit = 10)
     {
         $queryBuilder = $this->createQueryBuilder('rc');
 
@@ -51,6 +51,9 @@ class ResearchCentersRepository extends ServiceEntityRepository
             $queryBuilder->andWhere('rc.founding_year <= :dateEnd')
                 ->setParameter('dateEnd', $additionalData['date_end']);
         }
+
+        $queryBuilder->setFirstResult($offset)
+        ->setMaxResults($limit);
 
         return $queryBuilder->getQuery()->getResult();
     }

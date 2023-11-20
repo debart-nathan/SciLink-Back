@@ -22,13 +22,13 @@ class InvestorsRepository extends ServiceEntityRepository
     }
 
 
-    public function search($search, $additionalData)
+    public function search($search, $additionalData, $offset = 0, $limit = 10)
     {
-        $qb = $this->createQueryBuilder('i');
+        $queryBuilder = $this->createQueryBuilder('i');
 
-        $qb->where($qb->expr()->orX(
-            $qb->expr()->like('LOWER(i.name)', ':search'),
-            $qb->expr()->like('LOWER(i.sigle)', ':search')
+        $queryBuilder->where($queryBuilder->expr()->orX(
+            $queryBuilder->expr()->like('LOWER(i.name)', ':search'),
+            $queryBuilder->expr()->like('LOWER(i.sigle)', ':search')
         ))
             ->setParameter('search', '%' . strtolower($search) . '%');
         /* TODO Choisir si on veut domaine ou pas
@@ -38,7 +38,10 @@ class InvestorsRepository extends ServiceEntityRepository
                 ->setParameter('domainId', $additionalData['domain']);
         }
         */
-        return $qb->getQuery()->getResult();
+
+        $queryBuilder->setFirstResult($offset)
+            ->setMaxResults($limit);
+        return $queryBuilder->getQuery()->getResult();
     }
 
     //    /**
