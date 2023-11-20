@@ -69,11 +69,8 @@ class RelationStatusController extends AbstractController
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!$token) {
-            return new JsonResponse($responseError);
-        }
-        if($loginUser->getId() !== $relationStatus->getId()){
+        // Check if the user is an admin
+        if (!in_array('ROLE_ADMIN', $loginUser->getRoles())) {
             return new JsonResponse($responseError);
         }
 
@@ -89,17 +86,20 @@ class RelationStatusController extends AbstractController
     }
     #[Route('/RelationStatus/create/post', name: 'app_relation_status_create', methods: ['POST'])]
     public function create(
+        RelationStatusRepository $relationStatusRepository,
+        RelationStatus $relationStatus,
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage,
-        ResponseError $responseError
+        ResponseError $responseError,
+        TokenStorageInterface $tokenStorage
     ): JsonResponse {
         $token = $tokenStorage->getToken();
-        // Vérifier si l'utilisateur est authentifié
-        if (!$token) {
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        // Check if the user is an admin
+        if (!in_array('ROLE_ADMIN', $loginUser->getRoles())) {
             return new JsonResponse($responseError);
         }
-        //todo verifier que l'utilisateur est le propriétaire de la donnée
 
         // Créer un nouvel objet RelationStatus
         $relationStatus = new RelationStatus();
