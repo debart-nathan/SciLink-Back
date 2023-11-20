@@ -108,7 +108,7 @@ class ManagesController extends AbstractController
         return new JsonResponse($manageJson, 200, [], true);
     }
 
-    #[Route('/Manages/create', name: 'app_manages_create', methods: ['POST'])]
+    #[Route('/Manages/create/post', name: 'app_manages_create', methods: ['POST'])]
     public function create(// TODO : 
         Request $request,
         EntityManagerInterface $entityManager,
