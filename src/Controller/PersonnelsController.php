@@ -122,7 +122,7 @@ class PersonnelsController extends AbstractController
         // Vérifier les données nécessaires
         if (!isset($data['first_name']) || !isset($data['last_name'])) {
             return new JsonResponse(
-                ['error' => 'Les champs first_name et last_name sont requis.'],
+                ['error' => 'Les champs Prenom et Nom sont requis.'],
                 Response::HTTP_BAD_REQUEST
             );
         }
