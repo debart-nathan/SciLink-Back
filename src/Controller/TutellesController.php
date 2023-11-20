@@ -142,9 +142,11 @@ class TutellesController extends AbstractController
         InvestorsRepository $investorsRepository,
         ResearchCentersRepository $researchCentersRepository,
     ): JsonResponse {
-        
-        $user = $this->tokenStorage->getToken()->getUser();
-        if (!$this->authorizationChecker->isGranted('ROLE_ADMIN', $user)) {
+        $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        // Check if the user is an admin
+        if (!in_array('ROLE_ADMIN', $loginUser->getRoles())) {
             return new JsonResponse($responseError);
         }
         // Récupérer les données de la requête
