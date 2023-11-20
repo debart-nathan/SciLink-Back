@@ -40,44 +40,49 @@ class InitDatabaseCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('Lecture du fichier...'); // Reading the file...
+        $output->writeln('Lecture du fichier...'); 
 
         // Lire le fichier XLS
         $filename = __DIR__ . '/../../data/fr-esr-structures-recherche-publiques-actives.xls';
         $spreadsheet = IOFactory::load($filename);
         $worksheet = $spreadsheet->getActiveSheet();
-        $rawData = $worksheet->toArray();
 
-        $output->writeln('Prétraitement des données...'); // Preprocessing the data...
+        $output->writeln('Prétraitement des données...'); 
 
         // Créer une nouvelle barre de progression (50 unités)
-        $progressBar = new ProgressBar($output, count($rawData));
+        $progressBar = new ProgressBar($output, $worksheet->getHighestRow());
 
         // Démarrer et afficher la barre de progression
         $progressBar->start();
 
         // Traiter les données
-        $this->processData($rawData, $progressBar);
+        $this->processData($worksheet, $progressBar);
 
         // Assurer que la barre de progression est à 100%
         $progressBar->finish();
 
         $output->writeln('');
-        $output->writeln('Insertion des données dans la base de données terminée.'); // Inserting data into the database is complete.
+        $output->writeln('Insertion des données dans la base de données terminée.');
 
         return Command::SUCCESS;
     }
 
-    private function processData(array $rawData, ProgressBar $progressBar)
+    private function processData($worksheet, ProgressBar $progressBar)
     {
         // Ignorer la première ligne (noms des colonnes)
-        array_shift($rawData);
+        $rowIterator = $worksheet->getRowIterator(2);
 
         // Préparer la relation parent-enfant
         $relationships = [];
 
         // Boucle à travers les données
-        foreach ($rawData as $row) {
+        foreach ($rowIterator as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+            $row = [];
+            foreach ($cellIterator as $cell) {
+                $row[] = $cell->getValue();
+            }
             // Gérer ResearchCenter
             // Colonnes: numero_national_de_structure, libelle, sigle, annee_de_creation, site_web, fiche_rnsr
             $researchCenter = $this->handleEntity(ResearchCenters::class, ['id' => $row[0]], [
@@ -90,7 +95,7 @@ class InitDatabaseCommand extends Command
                 'fiche_msr' => $row[33],
             ]);
 
-            // Enregistrer la relation parent-enfant
+            // Enregistrer la relation pa ent-enfant
             $relationships[] = [
                 'center' => $researchCenter,
                 'parents' => explode(';', $row[23]),
