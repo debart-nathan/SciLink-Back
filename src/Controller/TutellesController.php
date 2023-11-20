@@ -138,15 +138,10 @@ class TutellesController extends AbstractController
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage,
         ResponseError $responseError,
         InvestorsRepository $investorsRepository,
         ResearchCentersRepository $researchCentersRepository,
-
-
     ): JsonResponse {
-        
-        // Vérifier si l'utilisateur est authentifié
         
         $user = $this->tokenStorage->getToken()->getUser();
         if (!$this->authorizationChecker->isGranted('ROLE_ADMIN', $user)) {
