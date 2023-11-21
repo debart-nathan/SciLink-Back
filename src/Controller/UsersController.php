@@ -44,13 +44,13 @@ class UsersController extends AbstractController
                     (($loginUser->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
-                    
+
                 );
 
-                $locationPrivacy =(($loginUser->getId() === $user->getId())&&$user->getLocation());
+                $locationPrivacy = (($loginUser->getId() === $user->getId()) && $user->getLocation());
             }
 
-            
+
 
             $usersArray[] = [
                 'id' => $user->getId(),
@@ -67,14 +67,19 @@ class UsersController extends AbstractController
     }
 
     #[Route('/Users/{id}', name: 'app_users_show', methods: ['GET'])]
-
     public function show(
         ContactVoter $contactVoter,
         TokenStorageInterface $tokenStorage,
-        Users $user
+        UsersRepository $usersRepository,
+        int $id
     ): JsonResponse {
+        $user = $usersRepository->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
         $token = $tokenStorage->getToken();
-        $privacySecurity=false;
+        $privacySecurity = false;
         if ($token) {
             /** @var Users $loginUser */
             $loginUser = $token->getUser();
