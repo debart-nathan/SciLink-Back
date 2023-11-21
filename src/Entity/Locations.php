@@ -15,13 +15,13 @@ class Locations
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255 , nullable: true)]
     private ?string $address = null;
 
-    #[ORM\Column]
-    private ?int $postal_code = null;
+    #[ORM\Column(length: 255,nullable:true)]
+    private ?string $postal_code = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable:true)]
     private ?string $commune = null;
 
     #[ORM\OneToMany(mappedBy: 'located', targetEntity: ResearchCenters::class)]
@@ -46,19 +46,19 @@ class Locations
         return $this->address;
     }
 
-    public function setAddress(string $address): static
+    public function setAddress(?string $address): static
     {
         $this->address = $address;
 
         return $this;
     }
 
-    public function getPostalCode(): ?int
+    public function getPostalCode(): ?string
     {
         return $this->postal_code;
     }
 
-    public function setPostalCode(int $postal_code): static
+    public function setPostalCode(?string $postal_code): static
     {
         $this->postal_code = $postal_code;
 
@@ -70,7 +70,7 @@ class Locations
         return $this->commune;
     }
 
-    public function setCommune(string $commune): static
+    public function setCommune(?string $commune): static
     {
         $this->commune = $commune;
 

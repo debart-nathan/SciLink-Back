@@ -2,23 +2,22 @@
 
 namespace App\Entity;
 
-use App\Repository\ResearchCenterRepository;
+use App\Repository\ResearchCentersRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ResearchCenterRepository::class)]
+#[ORM\Entity(repositoryClass: ResearchCentersRepository::class)]
 class ResearchCenters
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(length:255)]
+    private ?string $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $libelle = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $sigle = null;
 
     #[ORM\Column]
@@ -27,10 +26,10 @@ class ResearchCenters
     #[ORM\Column]
     private ?bool $is_active = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $website = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $fiche_msr = null;
 
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'childrens')]
@@ -43,15 +42,17 @@ class ResearchCenters
     private ?Locations $located = null;
 
     #[ORM\OneToMany(mappedBy: 'researchCenter', targetEntity: Manages::class, orphanRemoval: true)]
-private Collection $manages;
+    private Collection $manages;
 
     #[ORM\OneToMany(mappedBy: 'researchCenter', targetEntity: Tutelles::class, orphanRemoval: true)]
     private Collection $tutelles;
 
     #[ORM\ManyToMany(targetEntity: Domains::class, mappedBy: 'researchCenters')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private Collection $domains;
 
     #[ORM\ManyToMany(targetEntity: Users::class, mappedBy: 'researchCenters')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private Collection $users;
 
     public function __construct()
@@ -64,9 +65,15 @@ private Collection $manages;
         $this->users = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): ?string
     {
         return $this->id;
+    }
+
+    public function setId(string $id): static
+    {
+        $this->id = $id;
+        return $this;
     }
 
     public function getLibelle(): ?string
@@ -86,7 +93,7 @@ private Collection $manages;
         return $this->sigle;
     }
 
-    public function setSigle(string $sigle): static
+    public function setSigle(?string $sigle): static
     {
         $this->sigle = $sigle;
 
@@ -122,7 +129,7 @@ private Collection $manages;
         return $this->website;
     }
 
-    public function setWebsite(string $website): static
+    public function setWebsite(?string $website): static
     {
         $this->website = $website;
 
@@ -134,7 +141,7 @@ private Collection $manages;
         return $this->fiche_msr;
     }
 
-    public function setFicheMsr(string $fiche_msr): static
+    public function setFicheMsr(?string $fiche_msr): static
     {
         $this->fiche_msr = $fiche_msr;
 

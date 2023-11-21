@@ -17,11 +17,11 @@ class Manages
     private ?string $grade = null;
 
     #[ORM\ManyToOne(inversedBy: 'manages')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false,onDelete: 'CASCADE')]
     private ?Personnels $personnel = null;
 
     #[ORM\ManyToOne(inversedBy: 'manages')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false,onDelete: 'CASCADE')]
     private ?ResearchCenters $researchCenter = null;
 
     public function getId(): ?int

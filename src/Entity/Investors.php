@@ -31,6 +31,7 @@ class Investors
     private Collection $tutelles;
 
     #[ORM\ManyToOne(inversedBy: 'investors')]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Users $app_user = null;
 
     public function __construct()

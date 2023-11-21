@@ -38,13 +38,15 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
-    #[ORM\OneToOne(inversedBy: 'users', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'app_user', cascade: ['persist', 'remove'])]
     private ?Researchers $researcher = null;
 
     #[ORM\ManyToMany(targetEntity: ResearchCenters::class, inversedBy: 'users')]
+    #[ORM\JoinColumn(onDelete:"CASCADE")]
     private Collection $researchCenters;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\JoinColumn(onDelete:"SET NULL")]
     private ?Locations $location = null;
 
     #[ORM\OneToMany(mappedBy: 'app_user', targetEntity: Investors::class)]
@@ -61,8 +63,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         $this->researchCenters = new ArrayCollection();
         $this->investors = new ArrayCollection();
         $this->contacts_send = new ArrayCollection();
-        $this->contacts_recive = new ArrayCollection();
-        
+        $this->contacts_receive = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -289,8 +290,8 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function addContactsReceive(Contacts $contactsReceive): static
     {
-        if (!$this->contacts_recive->contains($contactsReceive)) {
-            $this->contacts_recive->add($contactsReceive);
+        if (!$this->contacts_receive->contains($contactsReceive)) {
+            $this->contacts_receive->add($contactsReceive);
             $contactsReceive->setAppUserReceive($this);
         }
 
@@ -299,7 +300,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeContactsReceive(Contacts $contactsReceive): static
     {
-        if ($this->contacts_recive->removeElement($contactsReceive)) {
+        if ($this->contacts_receive->removeElement($contactsReceive)) {
             // set the owning side to null (unless already changed)
             if ($contactsReceive->getAppUserReceive() === $this) {
                 $contactsReceive->setAppUserReceive(null);

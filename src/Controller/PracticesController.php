@@ -6,13 +6,19 @@ use App\Repository\DomainsRepository;
 use App\Repository\ResearchersRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class PracticesController extends AbstractController
 {
     #[Route('/Practices', name: 'app_practices')]
-    public function index(Request $request, ResearchersRepository $researchersRepository, DomainsRepository $domainsRepository): JsonResponse
+    public function index(
+        Request $request,
+        ResearchersRepository $researchersRepository,
+        DomainsRepository $domainsRepository
+        ): JsonResponse
     {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
@@ -22,7 +28,7 @@ class PracticesController extends AbstractController
                 $researcherId = $queryParams['researcher_id'];
             }
             // Vérifie si l'identifiant du domaine est présent dans les paramètres
-            if (isset($queryParams[''])) {
+            if (isset($queryParams['domain_id'])) {
                 $domainId = $queryParams['domain_id'];
             }
         }

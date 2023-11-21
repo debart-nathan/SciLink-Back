@@ -13,7 +13,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class LocatedsController extends AbstractController
 {
     #[Route('/Locateds', name: 'app_locateds')]
-    public function index(LocationsRepository $locationsRepository,ResearchCentersRepository $researchCentersRepository, Request $request,): JsonResponse
+    public function index(
+        LocationsRepository $locationsRepository,
+        ResearchCentersRepository $researchCentersRepository,
+        Request $request,
+        ): JsonResponse
     {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
@@ -42,15 +46,13 @@ class LocatedsController extends AbstractController
         }
         // Si l'identifiant du researchCenter est spécifié
         elseif (isset($researchCenterId)) {
+
             $researchCenter = $researchCentersRepository->find($researchCenterId);
-            $locations = $researchCenter->getLocated();
-            // Construit le tableau des pratiques pour le domaine et ses chercheurs
-            foreach ($locations as $location) {
-                $locatedsArray[] = [
-                    'location_id' =>  $location->getId(),
-                    'research_center_id' => $researchCenterId,
-                ];
-            }
+            $location = $researchCenter->getLocated();
+            $locatedsArray[] = [
+                'location_id' =>  $location->getId(),
+                'research_center_id' => $researchCenterId,
+            ];
         }
         // Si aucun identifiant spécifié, récupère toutes les location
         else {
@@ -62,7 +64,6 @@ class LocatedsController extends AbstractController
                     $locatedsArray[] = [
                         'location_id' => $location->getId(),
                         'research_center_id' => $researchCenter->getId(),
-
                     ];
                 }
             }

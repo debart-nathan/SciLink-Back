@@ -16,6 +16,7 @@ class Researchers
     private ?int $id = null;
 
     #[ORM\ManyToMany(targetEntity: Domains::class, inversedBy: 'researchers')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private Collection $domains;
 
     #[ORM\OneToOne(mappedBy: 'researcher', cascade: ['persist', 'remove'])]

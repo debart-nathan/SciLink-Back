@@ -6,6 +6,8 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 use App\Entity\Users;
+use App\Repository\ContactsRepository;
+use App\Repository\RelationStatusRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -13,11 +15,19 @@ class ContactVoter extends Voter
 {
     private $security;
     private $entityManager;
+    private $contactsRepository;
+    private $relationStatusRepository;
 
-    public function __construct(Security $security, EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        Security $security,
+        EntityManagerInterface $entityManager,
+        ContactsRepository $contactsRepository,
+        RelationStatusRepository $relationStatusRepository
+    ) {
         $this->security = $security;
         $this->entityManager = $entityManager;
+        $this->contactsRepository = $contactsRepository;
+        $this->relationStatusRepository = $relationStatusRepository;
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -28,30 +38,29 @@ class ContactVoter extends Voter
             && $subject instanceof Users;
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    public function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
         $user = $token->getUser();
-        // if the user is anonymous, do not grant access
+        // si l’utilisateur n'est pas connecté envoyer faux
         if (!$user instanceof UserInterface) {
             return false;
         }
 
         if ($attribute === 'HAS_ACCEPTED_CONTACT') {
-            $contactRepository = $this->entityManager->getRepository(Contacts::class);
-            $relationStatusRepository = $this->entityManager->getRepository(RelationStatus::class);
-            $acceptedStatus = $relationStatusRepository->findOneBy(['status' => 'accepted']);
 
-            // Check if there's an accepted contact where the authenticated user is the sender and the subject is the receiver
-            $contactAsSender = $contactRepository->findOneBy([
+            $acceptedStatus = $this->relationStatusRepository->findOneBy(['status' => 'accepted']);
+
+           // vérifie si l'utilisateur connecté a envoyer une demande de contact qui a était accepté par le sujet
+            $contactAsSender = $this->contactsRepository->findOneBy([
                 'app_user_send' => $user,
-                'app_user_receive' => $subject,
+                'app_user_recive' => $subject,
                 'relationStatus' => $acceptedStatus
             ]);
 
-            // Check if there's an accepted contact where the authenticated user is the receiver and the subject is the sender
-            $contactAsReceiver = $contactRepository->findOneBy([
+            // vérifie si le sujet a envoyer une demande de contact qui a était accepté par l'utilisateur connecté
+            $contactAsReceiver = $this->contactsRepository->findOneBy([
                 'app_user_send' => $subject,
-                'app_user_receive' => $user,
+                'app_user_recive' => $user,
                 'relationStatus' => $acceptedStatus
             ]);
 
