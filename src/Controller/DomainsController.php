@@ -76,7 +76,7 @@ class DomainsController extends AbstractController
         return new JsonResponse($domainJson, JsonResponse::HTTP_CREATED, [], true);
     }
 
-
+    
     #[Route('/Domains/{id}/delete', name: 'delete_domain', methods: ['DELETE'])]
     public function deleteDomain(int $id, EntityManagerInterface $entityManager, DomainsRepository $domainsRepository, Domains $domain): JsonResponse
     {

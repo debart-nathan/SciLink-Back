@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -140,7 +141,7 @@ class TutellesController extends AbstractController
         ResponseError $responseError,
         InvestorsRepository $investorsRepository,
         ResearchCentersRepository $researchCentersRepository,
-        TokenStorageInterface $tokenStorage
+        TokenStorageInterface $tokenStorage,
     ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
