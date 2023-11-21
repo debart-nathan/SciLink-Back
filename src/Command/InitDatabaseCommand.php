@@ -6,6 +6,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Entity\ResearchCenters;
@@ -30,24 +31,24 @@ class InitDatabaseCommand extends Command
 
         parent::__construct();
     }
-
     protected function configure()
     {
         $this
             ->setDescription('Initialise la base de données avec des données pré-remplies.')
-            ->setHelp('Cette commande vous permet de pré-remplir votre base de données...');
+            ->setHelp('Cette commande vous permet de pré-remplir votre base de données...')
+            ->addArgument('cacheOption', InputArgument::OPTIONAL, 'Use cache for entities', 'cache');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('Lecture du fichier...'); 
+        $output->writeln('Lecture du fichier...');
 
         // Lire le fichier XLS
         $filename = __DIR__ . '/../../data/fr-esr-structures-recherche-publiques-actives.xls';
         $spreadsheet = IOFactory::load($filename);
         $worksheet = $spreadsheet->getActiveSheet();
 
-        $output->writeln('Prétraitement des données...'); 
+        $output->writeln('Prétraitement des données...');
 
         // Créer une nouvelle barre de progression (50 unités)
         $progressBar = new ProgressBar($output, $worksheet->getHighestRow());
@@ -56,7 +57,8 @@ class InitDatabaseCommand extends Command
         $progressBar->start();
 
         // Traiter les données
-        $this->processData($worksheet, $progressBar);
+        $cacheOption = $input->getArgument('cacheOption');
+        $this->processData($worksheet, $progressBar, $cacheOption);
 
         // Assurer que la barre de progression est à 100%
         $progressBar->finish();
@@ -67,7 +69,7 @@ class InitDatabaseCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function processData($worksheet, ProgressBar $progressBar)
+    private function processData($worksheet, ProgressBar $progressBar, string $cacheOption)
     {
         // Ignorer la première ligne (noms des colonnes)
         $rowIterator = $worksheet->getRowIterator(2);
@@ -93,7 +95,7 @@ class InitDatabaseCommand extends Command
                 'is_active' => true,
                 'website' =>  filter_var($row[7], FILTER_VALIDATE_URL) ?: null,
                 'fiche_msr' => $row[33],
-            ]);
+            ], $cacheOption);
 
             // Enregistrer la relation pa ent-enfant
             $relationships[] = [
@@ -109,7 +111,7 @@ class InitDatabaseCommand extends Command
                     'address' => $row[8],
                     'postal_code' => $row[9],
                     'commune' => $row[10],
-                ]);
+                ], $cacheOption);
 
                 // Définir l'emplacement pour le centre de recherche
                 $researchCenter->setLocated($location);
@@ -130,13 +132,13 @@ class InitDatabaseCommand extends Command
                 $personnel = $this->handleEntity(Personnels::class, ['first_name' => $personnelFirstNames[$i], 'last_name' => $personnelNames[$i]], [
                     'first_name' => $personnelFirstNames[$i],
                     'last_name' => $personnelNames[$i],
-                ]);
+                ], $cacheOption);
 
                 $manage = $this->handleEntity(Manages::class, ['personnel' => $personnel->getId(), 'researchCenter' => $researchCenter->getId()], [
                     'personnel' => $personnel,
                     'researchCenter' => $researchCenter,
                     'grade' => $personnelTitles[$i],
-                ]);
+                ], $cacheOption);
                 $researchCenter->addManage($manage);
             }
 
@@ -162,7 +164,7 @@ class InitDatabaseCommand extends Command
                     'nature' => $investorNatures[$i],
                     'type' => "Organism",
                     'label' => $investorLabels[$i]
-                ]);
+                ], $cacheOption);
 
                 $tutelle = $this->handleEntity(Tutelles::class, ['investor' => $investor->getId(), 'researchCenter' => $researchCenter->getId()], [
                     'investor' => $investor,
@@ -170,7 +172,7 @@ class InitDatabaseCommand extends Command
                     'uai' => $tutelleUais[$i],
                     'type' => $tutelleTypes[$i],
                     'siret' => $tutelleSirets[$i],
-                ]);
+                ], $cacheOption);
             }
 
             // Gérer l'entité Domains
@@ -187,7 +189,7 @@ class InitDatabaseCommand extends Command
                 $domain = $this->handleEntity(Domains::class, ['id' => $domainIds[$i]], [
                     'id' => $domainIds[$i],
                     'name' => $domainNames[$i],
-                ]);
+                ], $cacheOption);
 
                 // Ajouter le Domaine au ResearchCenter
                 $researchCenter->addDomain($domain);
@@ -240,26 +242,37 @@ class InitDatabaseCommand extends Command
         $this->entityManager->flush();
     }
 
-    private function handleEntity(string $entityClass, $criteria, array $data)
+    private function handleEntity(string $entityClass, $criteria, array $data, string $cacheOption)
     {
-
-        $cacheKey = $entityClass . ':' . http_build_query($criteria);
-
-        // Vérifier si l'entité est dans le cache
-        if (isset($this->entitiesCache[$cacheKey])) {
-            $entity = $this->entitiesCache[$cacheKey];
+        if ($cacheOption === 'cache') {
+            // existing caching logic
+            $cacheKey = $entityClass . ':' . http_build_query($criteria);
+    
+            // Check if the entity is in the cache
+            if (isset($this->entitiesCache[$cacheKey])) {
+                $entity = $this->entitiesCache[$cacheKey];
+            } else {
+                // If the entity is not in the cache, get it from the database
+                $entity = $this->entityManager->getRepository($entityClass)->findOneBy($criteria);
+    
+                // If the entity does not exist in the database, create a new one
+                if (!$entity) {
+                    $entity = new $entityClass();
+                }
+    
+                // Store the entity in the cache
+                $this->entitiesCache[$cacheKey] = $entity;
+            }
         } else {
-            // Si l'entité n'est pas dans le cache, la récupérer de la base de données
+            // logic without caching
             $entity = $this->entityManager->getRepository($entityClass)->findOneBy($criteria);
-
-            // Si l'entité n'existe pas dans la base de données, en créer une nouvelle
+    
+            // If the entity does not exist in the database, create a new one
             if (!$entity) {
                 $entity = new $entityClass();
             }
-
-            // Stocker l'entité dans le cache
-            $this->entitiesCache[$cacheKey] = $entity;
         }
+    
         foreach ($data as $property => $value) {
             $property = lcfirst(str_replace('_', '', ucwords($property, '_')));
             $setter = 'set' . ucfirst($property);
@@ -267,8 +280,14 @@ class InitDatabaseCommand extends Command
                 $entity->$setter($value);
             }
         }
-
+    
         $this->entityManager->persist($entity);
+    
+        // Flush the entity manager if cache is not used
+        if ($cacheOption !== 'cache') {
+            $this->entityManager->flush();
+        }
+    
         return $entity;
     }
 }

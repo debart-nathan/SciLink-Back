@@ -29,7 +29,7 @@ class Domains
         $this->researchers = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): ?string
     {
         return $this->id;
     }

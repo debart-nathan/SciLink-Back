@@ -2,13 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\Users;
 use App\Service\EmailService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class MailerController extends AbstractController
@@ -17,7 +18,11 @@ class MailerController extends AbstractController
     private $tokenStorage;
     private $params;
 
-    public function __construct(EmailService $emailService, TokenStorageInterface $tokenStorage, ParameterBagInterface $params)
+    public function __construct(
+        EmailService $emailService,
+        TokenStorageInterface $tokenStorage,
+        ParameterBagInterface $params
+        )
     {
         $this->emailService = $emailService;
         $this->tokenStorage = $tokenStorage;
@@ -80,7 +85,8 @@ class MailerController extends AbstractController
         $sender = $user->getEmail();
         $recipient = $this->params->get('company_email');
         $subject = 'Demande de lien de ' . $user->getUsername();
-        $message = 'L\'utilisateur ' . $user->getUsername() . ' souhaite lier son compte au profil ' . $profileType . ' avec l\'id ' . $profileId;
+        $message = 'L\'utilisateur ' . $user->getUsername() .
+        ' souhaite lier son compte au profil ' . $profileType . ' avec l\'id ' . $profileId;
 
         $this->emailService->sendEmail($sender, $recipient, $subject, $message);
 
