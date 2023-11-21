@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\UsersRepository;
+use App\Security\Voter\ContactVoter;
 
 class ConnectionController extends AbstractController
 {
@@ -26,10 +27,17 @@ class ConnectionController extends AbstractController
         $this->entityManager = $entityManager;
     }
     #[Route('/register', name: 'app_register', methods: ['POST'])]
-    public function register(Request $request): Response
+    public function register(Request $request, TokenStorageInterface $tokenStorage, SessionInterface $session, UsersRepository $usersRepository): Response
     {
         $data = json_decode($request->getContent(), true);
 
+
+
+        // regarde si l'utilisateur existe déjà
+        $existingUser = $usersRepository->findOneBy(['email' => $data['email']]);
+        if ($existingUser) {
+            return new JsonResponse(['error' => 'User already exists'], Response::HTTP_CONFLICT);
+        }
 
         // Valide email
         if (!isset($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
@@ -51,9 +59,9 @@ class ConnectionController extends AbstractController
             // (?=.*[@$,_\-.;:!%*?&]) - Le mot de passe doit contenir au moins un caractère spécial
             // [A-Za-z\d@$!%*?&]{8,}$ - Le mot de passe doit contenir au moins 8 caractères
             return new JsonResponse(
-                ['error' => 'Le mot de passe doit contenir au moins 8 caractères, 1 lettre majuscule,'.
-                '1 lettre minuscule, 1 chiffre et 1 caractère spécial']
-                , Response::HTTP_BAD_REQUEST
+                ['error' => 'Le mot de passe doit contenir au moins 8 caractères, 1 lettre majuscule,' .
+                    '1 lettre minuscule, 1 chiffre et 1 caractère spécial'],
+                Response::HTTP_BAD_REQUEST
             );
         }
 
@@ -114,7 +122,11 @@ class ConnectionController extends AbstractController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return new Response('User registered successfully', Response::HTTP_CREATED);
+        $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+        $tokenStorage->setToken($token);
+        $session->set('_security_main', serialize($token));
+
+        return new Response('User registered and logged in successfully', Response::HTTP_CREATED);
     }
 
     #[Route('/login', name: 'app_login', methods: ['POST'])]
@@ -152,5 +164,59 @@ class ConnectionController extends AbstractController
     public function logout()
     {
         // cette route doit exister mais elle est géré automatiquement
+    }
+
+    #[Route('/is-logged-in', name: 'app_is_logged_in', methods: ['GET'])]
+    public function isLoggedIn(TokenStorageInterface $tokenStorage): JsonResponse
+    {
+        $token = $tokenStorage->getToken();
+        if (!$token) {
+            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
+        }
+        return new JsonResponse(['status' => 'Logged in'], Response::HTTP_OK);
+    }
+
+    #[Route('/is-admin', name: 'app_is_admin', methods: ['GET'])]
+    public function isAdmin(TokenStorageInterface $tokenStorage): JsonResponse
+    {
+        $token = $tokenStorage->getToken();
+        if (!$token) {
+            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        /** @var Users $loggedInUser */
+        $loggedInUser = $token->getUser();
+
+        if (!in_array('ROLE_ADMIN', $loggedInUser->getRoles())) {
+            return new JsonResponse(['error' => 'Not an admin'], Response::HTTP_FORBIDDEN);
+        }
+        return new JsonResponse(['status' => 'Is an admin'], Response::HTTP_OK);
+    }
+
+    #[Route('/is-friend/{id}', name: 'app_is_friend', methods: ['GET'])]
+    public function isFriend(
+        ContactVoter $contactVoter,
+        TokenStorageInterface $tokenStorage,
+        UsersRepository $usersRepository,
+        int $id
+    ): JsonResponse {
+        $user = $usersRepository->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $token = $tokenStorage->getToken();
+        if (!$token) {
+            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        /** @var Users $loggedInUser */
+        $loggedInUser = $token->getUser();
+
+        if (!$contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)) {
+            return new JsonResponse(['error' => 'Not friends'], Response::HTTP_FORBIDDEN);
+        }
+        return new JsonResponse(['status' => 'Is friends'], Response::HTTP_OK);
     }
 }
