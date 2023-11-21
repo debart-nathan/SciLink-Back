@@ -23,11 +23,11 @@ class Tutelles
     private ?string $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'tuteles')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false,onDelete:"CASCADE")]
     private ?Investors $investor = null;
 
     #[ORM\ManyToOne(inversedBy: 'tuteles')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false,onDelete:"CASCADE")]
     private ?ResearchCenters $researchCenter = null;
 
     public function getId(): ?int

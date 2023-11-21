@@ -42,9 +42,11 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Researchers $researcher = null;
 
     #[ORM\ManyToMany(targetEntity: ResearchCenters::class, inversedBy: 'users')]
+    #[ORM\JoinColumn(onDelete:"CASCADE")]
     private Collection $researchCenters;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\JoinColumn(onDelete:"SET NULL")]
     private ?Locations $location = null;
 
     #[ORM\OneToMany(mappedBy: 'app_user', targetEntity: Investors::class)]

@@ -48,9 +48,11 @@ class ResearchCenters
     private Collection $tutelles;
 
     #[ORM\ManyToMany(targetEntity: Domains::class, mappedBy: 'researchCenters')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private Collection $domains;
 
     #[ORM\ManyToMany(targetEntity: Users::class, mappedBy: 'researchCenters')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private Collection $users;
 
     public function __construct()

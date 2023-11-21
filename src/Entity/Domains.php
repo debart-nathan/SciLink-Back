@@ -18,9 +18,11 @@ class Domains
     private ?string $name = null;
 
     #[ORM\ManyToMany(targetEntity: ResearchCenters::class, inversedBy: 'domains')]
+    #[ORM\JoinColumn(nullable: false,onDelete: 'CASCADE')]
     private Collection $researchCenters;
 
     #[ORM\ManyToMany(targetEntity: Researchers::class, mappedBy: 'domains')]
+    #[ORM\JoinColumn(nullable: false,onDelete: 'CASCADE')]
     private Collection $researchers;
 
     public function __construct()
