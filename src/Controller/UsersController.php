@@ -44,13 +44,13 @@ class UsersController extends AbstractController
                     (($loginUser->getId() === $user->getId())) ||
                     // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                     $contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
-                    
+
                 );
 
-                $locationPrivacy =(($loginUser->getId() === $user->getId())&&$user->getLocation());
+                $locationPrivacy = (($loginUser->getId() === $user->getId()) && $user->getLocation());
             }
 
-            
+
 
             $usersArray[] = [
                 'id' => $user->getId(),
@@ -74,7 +74,7 @@ class UsersController extends AbstractController
         Users $user
     ): JsonResponse {
         $token = $tokenStorage->getToken();
-        $privacySecurity=false;
+        $privacySecurity = false;
         if ($token) {
             /** @var Users $loginUser */
             $loginUser = $token->getUser();
@@ -150,7 +150,7 @@ class UsersController extends AbstractController
         return new JsonResponse($userJson, 200, [], true);
     }
 
-    #[Route('/Users/{id}/delete', name: 'delete_user', methods: ['DELETE'])]
+    #[Route('/Users/{id}/delete', name: 'app_users_delete', methods: ['DELETE'])]
     public function deleteUser(int $id, EntityManagerInterface $entityManager, UsersRepository $userRepository, Users $user,): JsonResponse
     {
 

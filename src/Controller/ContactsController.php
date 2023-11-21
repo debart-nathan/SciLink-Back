@@ -61,12 +61,12 @@ class ContactsController extends AbstractController
     #[Route('/Contacts/{id}/patch', name: 'app_contacts_update', methods: ['PATCH'])]
     public function update(
         ContactsRepository $contactRepository,
-        Contacts $contact, Request $request,
+        Contacts $contact,
+        Request $request,
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -102,17 +102,16 @@ class ContactsController extends AbstractController
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!$token){
+        if (!$token) {
             return new JsonResponse($responseError);
-}
+        }
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-        
-        if  (!$loginUser->getId() === $contact->getAppUserSend()->getId()) {
+
+        if (!$loginUser->getId() === $contact->getAppUserSend()->getId()) {
 
             return new JsonResponse($responseError);
         }
@@ -122,7 +121,7 @@ class ContactsController extends AbstractController
         $contact = new Contacts();
         $contact->setObject($data['object']);
         $contact->setSendDate(new \DateTime());
-        $contact->setAppUserSend($data['app_user_send_id']);//      TODO:   créer le l'apelant 
+        $contact->setAppUserSend($data['app_user_send_id']); //      TODO:   créer le l'apelant 
         $contact->setAppUserReceive($data['app_user_receive_id']); // a changer
 
         $entityManager->persist($contact);

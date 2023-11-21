@@ -18,8 +18,7 @@ class StudiesController extends AbstractController
         Request $request,
         ResearchCentersRepository $researchCentersRepository,
         DomainsRepository $domainsRepository
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
             $queryParams = $request->query->all();

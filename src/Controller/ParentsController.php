@@ -14,8 +14,7 @@ class ParentsController extends AbstractController
     public function index(
         ResearchCentersRepository $researchCentersRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif

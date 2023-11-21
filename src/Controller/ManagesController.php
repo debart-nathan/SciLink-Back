@@ -20,8 +20,7 @@ class ManagesController extends AbstractController
     public function index(
         ManagesRepository $managesRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -47,8 +46,7 @@ class ManagesController extends AbstractController
     public function show(
         ManagesRepository $manageRepository,
         Manages $manage
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $manageArray = [
             'id' => $manage->getId(),
             'grade' => $manage->getGrade(),
@@ -68,9 +66,7 @@ class ManagesController extends AbstractController
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError,
-        ): JsonResponse
-
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!$token) {
@@ -113,8 +109,7 @@ class ManagesController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         if (!$token) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
@@ -132,7 +127,7 @@ class ManagesController extends AbstractController
         $manage->setPersonnel($data['personnel_id']);
         $manage->setResearchCenter($data['research_center_id']);
 
-         if (!$loginUser->getId() === $manage->getResearchCenter()->getId()) {
+        if (!$loginUser->getId() === $manage->getResearchCenter()->getId()) {
             return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
         }
 
@@ -150,7 +145,7 @@ class ManagesController extends AbstractController
     }
 
     #[Route('/Manages/{id}/delete', name: 'delete_manage', methods: ['DELETE'])]
-    public function deleteManage(int $id, EntityManagerInterface $entityManager, ManagesRepository $managesRepository,Manages $manage): JsonResponse
+    public function deleteManage(int $id, EntityManagerInterface $entityManager, ManagesRepository $managesRepository, Manages $manage): JsonResponse
     {
 
         $manage = $managesRepository->find($id);

@@ -19,8 +19,7 @@ class PersonnelsController extends AbstractController
     public function index(
         PersonnelsRepository $personnelsRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         if ($request->query->count() > 0) {
             $queryParams = $request->query->all();
             $personnels = $personnelsRepository->findBy($queryParams);
@@ -44,8 +43,7 @@ class PersonnelsController extends AbstractController
     public function show(
         PersonnelsRepository $personnelRepository,
         Personnels $personnel
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $personnelArray = [
             'id' => $personnel->getId(),
             'first_name' => $personnel->getFirstName(),
@@ -63,9 +61,7 @@ class PersonnelsController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage
-        ): JsonResponse
-
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -109,5 +105,4 @@ class PersonnelsController extends AbstractController
 
         return new JsonResponse(['status' => 'Personnel deleted'], 200);
     }
-
 }

@@ -18,8 +18,7 @@ class PracticesController extends AbstractController
         Request $request,
         ResearchersRepository $researchersRepository,
         DomainsRepository $domainsRepository
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
             $queryParams = $request->query->all();

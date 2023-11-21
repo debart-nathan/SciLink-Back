@@ -19,8 +19,7 @@ class TutellesController extends AbstractController
     public function index(
         TutellesRepository $tutellesRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -49,8 +48,7 @@ class TutellesController extends AbstractController
     public function show(
         TutellesRepository $tutelleRepository,
         Tutelles $tutelle
-        ): JsonResponse
-    {
+    ): JsonResponse {
 
         $tutelleArray = [
             'id' => $tutelle->getId(),
@@ -73,9 +71,7 @@ class TutellesController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage
-        ): JsonResponse
-
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -121,17 +117,16 @@ class TutellesController extends AbstractController
     #[Route('/Tutelles/{id}/delete', name: 'delete_tutelle', methods: ['DELETE'])]
     public function deleteTutelle(int $id, EntityManagerInterface $entityManager, TutellesRepository $tutellesRepository, Tutelles $tutelle): JsonResponse
     {
-      
+
         $tutelle = $tutellesRepository->find($id);
 
         if (!$tutelle) {
             throw $this->createNotFoundException('Tutelle not found');
         }
-      
+
         $entityManager->remove($tutelle);
         $entityManager->flush();
 
         return new JsonResponse(['status' => 'Tutelle deleted'], 200);
     }
-
 }

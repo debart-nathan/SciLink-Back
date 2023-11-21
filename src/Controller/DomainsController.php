@@ -39,8 +39,7 @@ class DomainsController extends AbstractController
     public function show(
         DomainsRepository $domainsRepository,
         Domains $domain
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $domainsArray = [
             'id' => $domain->getId(),
             'name' => $domain->getName(),
@@ -51,7 +50,7 @@ class DomainsController extends AbstractController
 
 
     #[Route('/Domains/{id}/delete', name: 'delete_domain', methods: ['DELETE'])]
-    public function deleteDomain(int $id, EntityManagerInterface $entityManager, DomainsRepository $domainsRepository, Domains $domain ): JsonResponse
+    public function deleteDomain(int $id, EntityManagerInterface $entityManager, DomainsRepository $domainsRepository, Domains $domain): JsonResponse
     {
 
         $domain = $domainsRepository->find($id);

@@ -18,8 +18,7 @@ class RepresentedBysController extends AbstractController
         Request $request,
         ResearchCentersRepository $researchCentersRepository,
         UsersRepository $usersRepository
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
             $queryParams = $request->query->all();

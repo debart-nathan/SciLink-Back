@@ -17,8 +17,7 @@ class LocatedsController extends AbstractController
         LocationsRepository $locationsRepository,
         ResearchCentersRepository $researchCentersRepository,
         Request $request,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifie s'il y a des paramètres de requête
         if ($request->query->count() > 0) {
             $queryParams = $request->query->all();
@@ -62,7 +61,7 @@ class LocatedsController extends AbstractController
             // Construit le tableau des pratiques pour tous les chercheurs et leurs locations
             foreach ($locations as $location) {
                 $researchCenters = $location->getResearchCenters();
-                foreach ($researchCenters as $researchCenter ) {
+                foreach ($researchCenters as $researchCenter) {
                     $locatedsArray[] = [
                         'location_id' => $location->getId(),
                         'research_center_id' => $researchCenter->getId(),
@@ -72,6 +71,6 @@ class LocatedsController extends AbstractController
         }
         // Convertit le tableau en JSON et retourne une réponse JSON
         $locatedsJson = json_encode($locatedsArray);
-        return new JsonResponse($locatedsJson , 200, [], true);
+        return new JsonResponse($locatedsJson, 200, [], true);
     }
 }

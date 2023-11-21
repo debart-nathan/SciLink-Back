@@ -19,8 +19,7 @@ class RelationStatusController extends AbstractController
     public function index(
         RelationStatusRepository $relationStatusRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -38,15 +37,13 @@ class RelationStatusController extends AbstractController
         }
         $relationStatusJson = json_encode($relationStatusArray);
         return new JsonResponse($relationStatusJson, 200, [], true);
-
     }
 
     #[Route('/RelationStatus/{id}', name: 'app_relation_status_show', methods: ['GET'])]
     public function show(
         RelationStatusRepository $relationStatusRepository,
         RelationStatus $relationStatus
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $relationStatusArray = [
             'id' => $relationStatus->getId(),
             'status' => $relationStatus->getStatus(),
@@ -83,7 +80,7 @@ class RelationStatusController extends AbstractController
         return new JsonResponse($relationStatusJson, 200, [], true);
     }
     #[Route('/RelationStatus/{id}/delete', name: 'delete_relationStatus', methods: ['DELETE'])]
-    public function deleteRelationStatus(int $id, EntityManagerInterface $entityManager, RelationStatusRepository $relationSttusRepository, RelationStatus $relationStatus ): JsonResponse
+    public function deleteRelationStatus(int $id, EntityManagerInterface $entityManager, RelationStatusRepository $relationSttusRepository, RelationStatus $relationStatus): JsonResponse
     {
 
         $relationStatus = $relationSttusRepository->find($id);
@@ -96,5 +93,4 @@ class RelationStatusController extends AbstractController
 
         return new JsonResponse(['status' => 'RelationStatus deleted'], 200);
     }
-
 }

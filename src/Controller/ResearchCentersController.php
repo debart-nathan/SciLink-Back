@@ -20,8 +20,7 @@ class ResearchCentersController extends AbstractController
     public function index(
         ResearchCentersRepository $researchCentersRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -50,8 +49,7 @@ class ResearchCentersController extends AbstractController
     public function show(
         ResearchCentersRepository $researchCenterRepository,
         ResearchCenters $researchCenter
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $researchCenterArray = [
             'id' => $researchCenter->getId(),
             'label' => $researchCenter->getLibelle(),
@@ -70,11 +68,11 @@ class ResearchCentersController extends AbstractController
     #[Route('/ResearchCenters/{id}/patch', name: 'app_ResearchCenters_update', methods: ['PATCH'])]
     public function update(
         ResearchCentersRepository $researchCenterRepository,
-         ResearchCenters $researchCenter, Request $request,
-         EntityManagerInterface $entityManager,
-         TokenStorageInterface $tokenStorage): JsonResponse
-
-    {
+        ResearchCenters $researchCenter,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -121,20 +119,23 @@ class ResearchCentersController extends AbstractController
         return new JsonResponse($researchCenterJson, 200, [], true);
     }
 
-    #[Route('/ReseachCenters/{id}delete', name: 'delete_reseachCenter', Method: ['DELETE'])]
-    public function deleteRrseachCenter(int $id, EntityManagerInterface $entityManager,ResearchCentersRepository $researchCentersRepository, ResearchCenters $researchCenter){
+    #[Route('/ReseachCenters/{id}/delete', name: 'delete_reseachCenter', methods: ['DELETE'])]
+    public function deleteReseachCenter(
+        string $id,
+        EntityManagerInterface $entityManager,
+        ResearchCentersRepository $researchCentersRepository,
+        ResearchCenters $researchCenter
+    ) {
 
         $researchCenter = $researchCentersRepository->find($id);
 
-        if(!$researchCenter){
+        if (!$researchCenter) {
 
             throw $this->createNotFoundException('ReseachCenter not found');
-
         }
         $entityManager->Persist($researchCenter);
         $entityManager->flush();
-    
-        return new JsonResponse(['Status' => 'ReseachCenter '], 200);
+
+        return new JsonResponse(['Status' => 'ReseachCenter deleted'], 200);
     }
-   
 }
