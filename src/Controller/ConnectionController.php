@@ -40,15 +40,15 @@ class ConnectionController extends AbstractController
         if (!isset($data['password']) || strlen($data['password']) < 8) {
             return new JsonResponse(
                 ['error' => 'Mots de passe a besoin de au moins 8 char'],
-                 Response::HTTP_BAD_REQUEST
-                );
+                Response::HTTP_BAD_REQUEST
+            );
         }
-        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $data['password'])) {
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$,_\-.;:!%*?&])[A-Za-z\d@$,_\-.;:!%*?&]{8,}$/', $data['password'])) {
             // L'expression régulière vérifie les conditions suivantes :
             // ^(?=.*[a-z]) - Le mot de passe doit contenir au moins une lettre minuscule
             // (?=.*[A-Z]) - Le mot de passe doit contenir au moins une lettre majuscule
             // (?=.*\d) - Le mot de passe doit contenir au moins un chiffre
-            // (?=.*[@$!%*?&]) - Le mot de passe doit contenir au moins un caractère spécial
+            // (?=.*[@$,_\-.;:!%*?&]) - Le mot de passe doit contenir au moins un caractère spécial
             // [A-Za-z\d@$!%*?&]{8,}$ - Le mot de passe doit contenir au moins 8 caractères
             return new JsonResponse(
                 ['error' => 'Le mot de passe doit contenir au moins 8 caractères, 1 lettre majuscule,'.
@@ -61,26 +61,31 @@ class ConnectionController extends AbstractController
         if (!isset($data['user_name']) || strlen($data['user_name']) < 3) {
             return new JsonResponse(
                 ['error' => "le nom d'utilisateur doit être au moins 3 char"],
-                Response::HTTP_BAD_REQUEST);
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         if (
-            preg_match("/[<>\/{};\/\.\?:\=\+\*\(\)$%\^&@#!\[\]|\\]/",
-            $data['first_name']) ||
-            preg_match("/[<>\/{};\/\.\?:\=\+\*\(\)$%\^&@#!\[\]|\\]/",
-            $data['last_name'])
+            preg_match(
+                "/[<>\/{};\/\.\\\?:\=\+\*\(\)$%\^&@#!\[\]|]/",
+                $data['first_name']
+            ) ||
+            preg_match(
+                "/[<>\/{};\/\.\\\?:\=\+\*\(\)$%\^&@#!\[\]|]/",
+                $data['last_name']
+            )
         ) {
             return new JsonResponse(
-                ['error' => 'Le prénom et le nom ne doivent pas contenir de caractères spéciaux']
-                , Response::HTTP_BAD_REQUEST
+                ['error' => 'Le prénom et le nom ne doivent pas contenir de caractères spéciaux'],
+                Response::HTTP_BAD_REQUEST
             );
         }
 
         if (!isset($data['user_name']) || strlen($data['user_name']) > 25) {
             return new JsonResponse(
                 ['error' => "le nom d'utilisateur doit être maximum 25 char"],
-                 Response::HTTP_BAD_REQUEST
-                );
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         // Valide first_name and last_name
@@ -95,8 +100,8 @@ class ConnectionController extends AbstractController
         if (strlen($data['last_name']) > 50) {
             return new JsonResponse(
                 ['error' => "le nom de famille doit être maximum 50 char"],
-                 Response::HTTP_BAD_REQUEST
-                );
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $user = new Users();
@@ -118,8 +123,7 @@ class ConnectionController extends AbstractController
         TokenStorageInterface $tokenStorage,
         SessionInterface $session,
         UsersRepository $usersRepository
-        ): Response
-    {
+    ): Response {
         $data = json_decode($request->getContent(), true);
 
         $email = $data['username'];
