@@ -182,7 +182,7 @@ class ResearchCentersController extends AbstractController
         $researchCenterJson = json_encode($researchCenterArray);
         return new JsonResponse($researchCenterJson, Response::HTTP_CREATED, [], true);
     }
-}
+
 
     #[Route('/ReseachCenters/{id}/delete', name: 'delete_reseachCenter', methods: ['DELETE'])]
     public function deleteReseachCenter(

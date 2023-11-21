@@ -63,9 +63,7 @@ class PersonnelsController extends AbstractController
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError
-        ): JsonResponse
-
-    {
+    ): JsonResponse {
 
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
@@ -74,7 +72,7 @@ class PersonnelsController extends AbstractController
         if (!$token) {
             return new JsonResponse($responseError);
         }
-        if ($loginUser->getId() !== $personnel->getId()){
+        if ($loginUser->getId() !== $personnel->getId()) {
             return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
@@ -111,7 +109,7 @@ class PersonnelsController extends AbstractController
         // Vérifier si l'utilisateur est authentifié
         if (!$token) {
             return new JsonResponse($responseError);
-        }//TODO ... finir la verificación de l'utilisateur
+        } //TODO ... finir la verificación de l'utilisateur
 
         // Créer un nouvel objet Personnels
         $personnel = new Personnels();
@@ -147,7 +145,6 @@ class PersonnelsController extends AbstractController
 
         return new JsonResponse($personnelJson, Response::HTTP_CREATED, [], true);
     }
-}
 
     #[Route('/Personnels/{id}/delete', name: 'delete_personnel', methods: ['DELETE'])]
     public function deletePersonnel(int $id, EntityManagerInterface $entityManager, PersonnelsRepository $personnelsRepository, Personnels $personnel): JsonResponse
@@ -164,4 +161,3 @@ class PersonnelsController extends AbstractController
         return new JsonResponse(['status' => 'Personnel deleted'], 200);
     }
 }
-

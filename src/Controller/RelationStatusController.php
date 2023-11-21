@@ -136,7 +136,8 @@ class RelationStatusController extends AbstractController
         $relationStatusJson = json_encode($relationStatusArray);
 
         return new JsonResponse($relationStatusJson, Response::HTTP_CREATED, [], true);
-
+    }
+    
     #[Route('/RelationStatus/{id}/delete', name: 'delete_relationStatus', methods: ['DELETE'])]
     public function deleteRelationStatus(int $id, EntityManagerInterface $entityManager, RelationStatusRepository $relationSttusRepository, RelationStatus $relationStatus): JsonResponse
     {
