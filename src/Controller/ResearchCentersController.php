@@ -31,6 +31,11 @@ class ResearchCentersController extends AbstractController
         }
         $researchCentersArray = [];
         foreach ($researchCenters as $researchCenter) {
+            $users = $researchCenter->getUsers();
+            $usersArray = [];
+            foreach ($users as $user) {
+                $usersArray[] = $user->getId();
+            }
             $researchCentersArray[] = [
                 'id' => $researchCenter->getId(),
                 'label' => $researchCenter->getLibelle(),
@@ -39,6 +44,7 @@ class ResearchCentersController extends AbstractController
                 'is_active' => $researchCenter->isIsActive(),
                 'website' => $researchCenter->getWebsite(),
                 'fiche_msr' => $researchCenter->getFicheMsr(),
+                'users' => $usersArray, // add users here
             ];
         }
         $researchCentersJson = json_encode($researchCentersArray);
@@ -50,6 +56,11 @@ class ResearchCentersController extends AbstractController
         ResearchCentersRepository $researchCenterRepository,
         ResearchCenters $researchCenter
     ): JsonResponse {
+        $users = $researchCenter->getUsers();
+        $usersArray = [];
+        foreach ($users as $user) {
+            $usersArray[] = $user->getId();
+        }
         $researchCenterArray = [
             'id' => $researchCenter->getId(),
             'label' => $researchCenter->getLibelle(),
@@ -58,7 +69,7 @@ class ResearchCentersController extends AbstractController
             'is_active' => $researchCenter->isIsActive(),
             'website' => $researchCenter->getWebsite(),
             'fiche_msr' => $researchCenter->getFicheMsr(),
-
+            'users' => $usersArray, // add users here
         ];
         $researchCenterJson = json_encode($researchCenterArray);
         return new JsonResponse($researchCenterJson, 200, [], true);
@@ -139,7 +150,7 @@ class ResearchCentersController extends AbstractController
         }
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-        //todo : faire que que l'administrateur peut ajouter un centre de recherche
+        //TODO : faire que que l'administrateur peut ajouter un centre de recherche
 
         // Créer un nouvel objet ResearchCenters
         $researchCenter = new ResearchCenters();
@@ -204,4 +215,3 @@ class ResearchCentersController extends AbstractController
         return new JsonResponse(['Status' => 'ReseachCenter deleted'], 200);
     }
 }
-
