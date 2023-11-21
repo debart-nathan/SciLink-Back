@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Domains;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\DomainsRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\LocationsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -75,6 +74,7 @@ class DomainsController extends AbstractController
         $domainJson = json_encode($domainArray);
 
         return new JsonResponse($domainJson, JsonResponse::HTTP_CREATED, [], true);
+    }
 
 
     #[Route('/Domains/{id}/delete', name: 'delete_domain', methods: ['DELETE'])]

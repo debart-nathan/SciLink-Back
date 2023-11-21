@@ -140,6 +140,7 @@ class TutellesController extends AbstractController
         ResponseError $responseError,
         InvestorsRepository $investorsRepository,
         ResearchCentersRepository $researchCentersRepository,
+        TokenStorageInterface $tokenStorage
     ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
@@ -208,7 +209,7 @@ class TutellesController extends AbstractController
     }
 
 
-}
+
 
     #[Route('/Tutelles/{id}/delete', name: 'delete_tutelle', methods: ['DELETE'])]
     public function deleteTutelle(int $id, EntityManagerInterface $entityManager, TutellesRepository $tutellesRepository, Tutelles $tutelle): JsonResponse

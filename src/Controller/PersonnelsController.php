@@ -147,7 +147,8 @@ class PersonnelsController extends AbstractController
 
         return new JsonResponse($personnelJson, Response::HTTP_CREATED, [], true);
     }
-}
+
+
 
     #[Route('/Personnels/{id}/delete', name: 'delete_personnel', methods: ['DELETE'])]
     public function deletePersonnel(int $id, EntityManagerInterface $entityManager, PersonnelsRepository $personnelsRepository, Personnels $personnel): JsonResponse
