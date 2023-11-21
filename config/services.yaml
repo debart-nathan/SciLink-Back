@@ -19,9 +19,3 @@ services:
             - "../src/DependencyInjection/"
             - "../src/Entity/"
             - "../src/Kernel.php"
-
-    App\Serializer\CustomObjectNormalizer:
-            arguments:
-                - "@security.token_storage"
-                - '@App\Security\Voter\ContactVoter'
-            tags: ["serializer.normalizer"]

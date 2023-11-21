@@ -51,9 +51,9 @@ class ConnectionController extends AbstractController
             // (?=.*[@$,_\-.;:!%*?&]) - Le mot de passe doit contenir au moins un caractère spécial
             // [A-Za-z\d@$!%*?&]{8,}$ - Le mot de passe doit contenir au moins 8 caractères
             return new JsonResponse(
-                ['error' => 'Le mot de passe doit contenir au moins 8 caractères, 1 lettre majuscule,' .
-                    '1 lettre minuscule, 1 chiffre et 1 caractère spécial'],
-                Response::HTTP_BAD_REQUEST
+                ['error' => 'Le mot de passe doit contenir au moins 8 caractères, 1 lettre majuscule,'.
+                '1 lettre minuscule, 1 chiffre et 1 caractère spécial']
+                , Response::HTTP_BAD_REQUEST
             );
         }
 
