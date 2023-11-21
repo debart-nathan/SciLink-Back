@@ -31,8 +31,9 @@ class ResearchCentersRepository extends ServiceEntityRepository
         }
 
         if (!empty($additionalData['is_active'])) {
+            $is_active = $additionalData['is_active'] === 'true' ? 1 : 0;
             $queryBuilder->andWhere('rc.is_active = :isActive')
-                ->setParameter('isActive', $additionalData['is_active']);
+                ->setParameter('isActive', $is_active);
         }
 
         if (!empty($additionalData['domain'])) {

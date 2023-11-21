@@ -169,6 +169,7 @@ class SearchController extends AbstractController
         switch ($category) {
             case 'searcher':
                 $token = $this->tokenStorage->getToken();
+                $privacySecurity=false;
                 $user = $object->getUser();
                 if ($token) {
                     /** @var Users $loginUser */
@@ -182,7 +183,9 @@ class SearchController extends AbstractController
                     );
                 }
                 return [
-                    "id" => $object->getId(),
+                    "profil"=>[
+                        "id" => $object->getId(),
+                    ],
                     "user" => [
                         'id' => $user->getId(),
                         'user_name' => $user->getUserName(),
@@ -190,7 +193,6 @@ class SearchController extends AbstractController
                         'last_name' => $user->getLastName(),
                         'email' =>  $privacySecurity ? $user->getEmail() : null,
                     ]
-                    // add other fields as needed
                 ];
             case 'research-center':
                 return [
