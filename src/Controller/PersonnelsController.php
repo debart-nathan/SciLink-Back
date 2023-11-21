@@ -20,8 +20,7 @@ class PersonnelsController extends AbstractController
     public function index(
         PersonnelsRepository $personnelsRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         if ($request->query->count() > 0) {
             $queryParams = $request->query->all();
             $personnels = $personnelsRepository->findBy($queryParams);
@@ -45,8 +44,7 @@ class PersonnelsController extends AbstractController
     public function show(
         PersonnelsRepository $personnelRepository,
         Personnels $personnel
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $personnelArray = [
             'id' => $personnel->getId(),
             'first_name' => $personnel->getFirstName(),
@@ -68,6 +66,7 @@ class PersonnelsController extends AbstractController
         ): JsonResponse
 
     {
+
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -100,6 +99,7 @@ class PersonnelsController extends AbstractController
         $personnelJson = json_encode($personnelArray);
         return new JsonResponse($personnelJson, 200, [], true);
     }
+
     #[Route('/Personnels/create/post', name: 'app_personnels_create', methods: ['POST'])]
     public function create(
         Request $request,
@@ -148,3 +148,20 @@ class PersonnelsController extends AbstractController
         return new JsonResponse($personnelJson, Response::HTTP_CREATED, [], true);
     }
 }
+
+    #[Route('/Personnels/{id}/delete', name: 'delete_personnel', methods: ['DELETE'])]
+    public function deletePersonnel(int $id, EntityManagerInterface $entityManager, PersonnelsRepository $personnelsRepository, Personnels $personnel): JsonResponse
+    {
+
+        $personnel = $personnelsRepository->find($id);
+
+        if (!$personnel) {
+            throw $this->createNotFoundException('Personnel not found');
+        }
+        $entityManager->remove($personnel);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Personnel deleted'], 200);
+    }
+}
+

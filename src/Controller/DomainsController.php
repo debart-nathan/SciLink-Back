@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Domains;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\DomainsRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\LocationsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,8 +40,7 @@ class DomainsController extends AbstractController
     public function show(
         DomainsRepository $domainsRepository,
         Domains $domain
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $domainsArray = [
             'id' => $domain->getId(),
             'name' => $domain->getName(),
@@ -47,6 +48,7 @@ class DomainsController extends AbstractController
         $domainsJson = json_encode($domainsArray);
         return new JsonResponse($domainsJson, 200, [], true);
     }
+
     #[Route('/Domains/create/post', name: 'app_domains_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -73,5 +75,21 @@ class DomainsController extends AbstractController
         $domainJson = json_encode($domainArray);
 
         return new JsonResponse($domainJson, JsonResponse::HTTP_CREATED, [], true);
+
+
+    #[Route('/Domains/{id}/delete', name: 'delete_domain', methods: ['DELETE'])]
+    public function deleteDomain(int $id, EntityManagerInterface $entityManager, DomainsRepository $domainsRepository, Domains $domain): JsonResponse
+    {
+
+        $domain = $domainsRepository->find($id);
+
+        if (!$domain) {
+            throw $this->createNotFoundException('Domain not found');
+        }
+        $entityManager->remove($domain);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Domain deleted'], 200);
+
     }
 }

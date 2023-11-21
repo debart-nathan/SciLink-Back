@@ -20,8 +20,7 @@ class ManagesController extends AbstractController
     public function index(
         ManagesRepository $managesRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -47,8 +46,7 @@ class ManagesController extends AbstractController
     public function show(
         ManagesRepository $manageRepository,
         Manages $manage
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $manageArray = [
             'id' => $manage->getId(),
             'grade' => $manage->getGrade(),
@@ -68,9 +66,7 @@ class ManagesController extends AbstractController
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError,
-        ): JsonResponse
-
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!$token) {
@@ -116,6 +112,7 @@ class ManagesController extends AbstractController
         ResponseError $responseError
     ): JsonResponse
     {
+
         $token = $tokenStorage->getToken();
         if (!$token) {
             return new JsonResponse($responseError);
@@ -135,6 +132,7 @@ class ManagesController extends AbstractController
 
          if (!$loginUser->getId() === $manage->getResearchCenter()->getId()) {
             return new JsonResponse($responseError);
+
         }
 
         $entityManager->persist($manage);
@@ -148,5 +146,20 @@ class ManagesController extends AbstractController
         ];
         $manageJson = json_encode($manageArray);
         return new JsonResponse($manageJson, Response::HTTP_CREATED, [], true);
+    }
+
+    #[Route('/Manages/{id}/delete', name: 'delete_manage', methods: ['DELETE'])]
+    public function deleteManage(int $id, EntityManagerInterface $entityManager, ManagesRepository $managesRepository, Manages $manage): JsonResponse
+    {
+
+        $manage = $managesRepository->find($id);
+
+        if (!$manage) {
+            throw $this->createNotFoundException('Manage not found');
+        }
+        $entityManager->remove($manage);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Manage deleted'], 200);
     }
 }

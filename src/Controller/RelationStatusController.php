@@ -30,8 +30,7 @@ class RelationStatusController extends AbstractController
     public function index(
         RelationStatusRepository $relationStatusRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -49,15 +48,13 @@ class RelationStatusController extends AbstractController
         }
         $relationStatusJson = json_encode($relationStatusArray);
         return new JsonResponse($relationStatusJson, 200, [], true);
-
     }
 
     #[Route('/RelationStatus/{id}', name: 'app_relation_status_show', methods: ['GET'])]
     public function show(
         RelationStatusRepository $relationStatusRepository,
         RelationStatus $relationStatus
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $relationStatusArray = [
             'id' => $relationStatus->getId(),
             'status' => $relationStatus->getStatus(),
@@ -94,6 +91,7 @@ class RelationStatusController extends AbstractController
         $relationStatusJson = json_encode($relationStatus);
         return new JsonResponse($relationStatusJson, 200, [], true);
     }
+
     #[Route('/RelationStatus/create/post', name: 'app_relation_status_create', methods: ['POST'])]
     public function create(
         RelationStatusRepository $relationStatusRepository,
@@ -138,5 +136,20 @@ class RelationStatusController extends AbstractController
         $relationStatusJson = json_encode($relationStatusArray);
 
         return new JsonResponse($relationStatusJson, Response::HTTP_CREATED, [], true);
+
+    #[Route('/RelationStatus/{id}/delete', name: 'delete_relationStatus', methods: ['DELETE'])]
+    public function deleteRelationStatus(int $id, EntityManagerInterface $entityManager, RelationStatusRepository $relationSttusRepository, RelationStatus $relationStatus): JsonResponse
+    {
+
+        $relationStatus = $relationSttusRepository->find($id);
+
+        if (!$relationStatus) {
+            throw $this->createNotFoundException('RelationStatus not found');
+        }
+        $entityManager->remove($relationStatus);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'RelationStatus deleted'], 200);
+
     }
 }

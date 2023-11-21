@@ -22,8 +22,7 @@ class ResearchersController extends AbstractController
         ResearchersRepository $researchersRepository,
         Request $request,
         UsersRepository $usersRepository
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -56,8 +55,7 @@ class ResearchersController extends AbstractController
     public function show(
         ResearchersRepository $researcherRepository,
         Researchers $researcher
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $user_id = $researcher->getUser() ? $researcher->getUser()->getId() : null;
         $researcherArray = [
             'id' => $researcher->getId(),
@@ -72,13 +70,13 @@ class ResearchersController extends AbstractController
     #[Route('/Researchers/{id}/patch', name: 'app_researchers_update', methods: ['PATCH'])]
     public function update(
         ResearchersRepository $researcherRepository,
-        Researchers $researcher, Request $request,
+        Researchers $researcher,
+        Request $request,
         EntityManagerInterface $entityManager,
+
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError
-        ): JsonResponse
-
-    {
+        ): JsonResponse  {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -172,12 +170,11 @@ class ResearchersController extends AbstractController
 {
         $researcher = $researcherRepository->find($id);
         if (!$researcher) {
-            throw $this->createNotFoundException('User not found');
+            throw $this->createNotFoundException('Researcher not found');
         }
         $entityManager->remove($researcher);
         $entityManager->flush();
 
-        return new JsonResponse(['status' => 'researcher deleted'], 200);
-}
-
+        return new JsonResponse(['status' => 'Researcher deleted'], 200);
+    }
 }

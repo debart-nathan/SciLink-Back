@@ -64,6 +64,7 @@ class SearchController extends AbstractController
                         'searcher',
                         $offset,
                         $limit
+
                     );
                     break;
                 case 'research-center':
@@ -74,6 +75,7 @@ class SearchController extends AbstractController
                         'research-center',
                         $offset,
                         $limit
+
                     );
                     break;
                 case 'investor':

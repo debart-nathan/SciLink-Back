@@ -112,6 +112,7 @@ class ContactsController extends AbstractController
         ResponseError $responseError
     ): JsonResponse {
         $token = $tokenStorage->getToken();
+        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!$token) {
             return new JsonResponse($responseError);
         }
@@ -119,6 +120,7 @@ class ContactsController extends AbstractController
         $loginUser = $token->getUser();
         // Check if the logged in user is the recipient of the contact
         if ($loginUser->getId() !== $contact->getAppUserReceive()->getId()) {
+
             return new JsonResponse($responseError);
         }
         $data = json_decode($request->getContent(), true);
@@ -157,6 +159,7 @@ class ContactsController extends AbstractController
         $contact->setAppUserReceive($data['app_user_receive_id']);
         $contact->setRelationStatus($relationStatusRepository->findOneBy(['name' => 'pending']));
 
+
         $entityManager->persist($contact);
         $entityManager->flush();
 
@@ -173,4 +176,22 @@ class ContactsController extends AbstractController
         $contactJson = json_encode($contactArray);
         return new JsonResponse($contactJson, 200, [], true);
     }
+
+
+
+    #[Route('/Contacts/{id}/delete', name: 'delete_contact', methods: ['DELETE'])]
+    public function deleteContact(int $id, EntityManagerInterface $entityManager, ContactsRepository $contactsRepository, Contacts $contact): JsonResponse
+    {
+
+        $contact = $contactsRepository->find($id);
+
+        if (!$contact) {
+            throw $this->createNotFoundException('Contact not found');
+        }
+        $entityManager->remove($contact);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Contact deleted'], 200);
+    }
+
 }

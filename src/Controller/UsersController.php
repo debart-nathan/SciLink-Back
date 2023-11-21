@@ -155,7 +155,7 @@ class UsersController extends AbstractController
         return new JsonResponse($userJson, 200, [], true);
     }
 
-    #[Route('/Users/{id}/delete', name: 'delete_user', methods: ['DELETE'])]
+    #[Route('/Users/{id}/delete', name: 'app_users_delete', methods: ['DELETE'])]
     public function deleteUser(int $id, EntityManagerInterface $entityManager, UsersRepository $userRepository, Users $user,): JsonResponse
     {
 

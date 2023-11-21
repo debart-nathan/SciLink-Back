@@ -62,6 +62,7 @@ class LocationsController extends AbstractController
         Locations $locations,
         Request $request,
         EntityManagerInterface $entityManager,
+
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError
         ): JsonResponse
@@ -111,12 +112,11 @@ class LocationsController extends AbstractController
         Locations $location,
         EntityManagerInterface $entityManager,
         LocationsRepository $locationsRepository
-         ): JsonResponse
-    {
+    ): JsonResponse {
         $location = $locationsRepository->find($id);
- 
+
         if ($request->isMethod('DELETE')) {
-           
+
             $entityManager->remove($location);
             $entityManager->flush();
 
@@ -129,17 +129,20 @@ class LocationsController extends AbstractController
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
+
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError
     ): JsonResponse
     {
+
         //récupérer le jeton d'authentification de l'utilisateur connecté
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!$token) {
             return new JsonResponse($responseError);//code HTTP 401
+
         }
-      
+
         $data = json_decode($request->getContent(), true);
 
         $location = new Locations();
@@ -159,6 +162,19 @@ class LocationsController extends AbstractController
         ];
         $locationsJson = json_encode($locationsArray);
         return new JsonResponse($locationsJson, Response::HTTP_CREATED, [], true);
+    }
+    #[Route('/Locations/{id}/delete', name: 'delete_locations', methods: ['DELETE'])]
+    public function deleteLocation(int $id, EntityManagerInterface $entityManager, LocationsRepository $locationsRepository, Locations $location): JsonResponse
+    {
 
+        $location = $locationsRepository->find($id);
+
+        if (!$location) {
+            throw $this->createNotFoundException('Location not found');
+        }
+        $entityManager->remove($location);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Locations deleted'], 200);
     }
 }

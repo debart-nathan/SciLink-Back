@@ -73,6 +73,7 @@ class ResearchCentersController extends AbstractController
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError
+
     ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
@@ -122,6 +123,7 @@ class ResearchCentersController extends AbstractController
         $researchCenterJson = json_encode($researchCenterArray);
         return new JsonResponse($researchCenterJson, 200, [], true);
     }
+
 
     #[Route('/ResearchCenters/create/post', name: 'app_researchCenters_create', methods: ['POST'])]
     public function create(
@@ -181,3 +183,25 @@ class ResearchCentersController extends AbstractController
         return new JsonResponse($researchCenterJson, Response::HTTP_CREATED, [], true);
     }
 }
+
+    #[Route('/ReseachCenters/{id}/delete', name: 'delete_reseachCenter', methods: ['DELETE'])]
+    public function deleteReseachCenter(
+        string $id,
+        EntityManagerInterface $entityManager,
+        ResearchCentersRepository $researchCentersRepository,
+        ResearchCenters $researchCenter
+    ) {
+
+        $researchCenter = $researchCentersRepository->find($id);
+
+        if (!$researchCenter) {
+
+            throw $this->createNotFoundException('ReseachCenter not found');
+        }
+        $entityManager->Persist($researchCenter);
+        $entityManager->flush();
+
+        return new JsonResponse(['Status' => 'ReseachCenter deleted'], 200);
+    }
+}
+

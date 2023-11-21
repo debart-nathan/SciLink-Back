@@ -20,8 +20,7 @@ class InvestorsController extends AbstractController
     public function index(
         InvestorsRepository $investorsRepository,
         Request $request
-        ): JsonResponse
-    {
+    ): JsonResponse {
         // Vérifier si la chaîne de requête existe
         if ($request->query->count() > 0) {
             // Récupérer les paramètres de la chaîne de requête dans un tableau associatif
@@ -50,8 +49,7 @@ class InvestorsController extends AbstractController
     public function show(
         InvestorsRepository $investorRepository,
         Investors $investor
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $user_id = $investor->getAppUser() ? $investor->getAppUser()->getId() : null;
         $investorArray = [
             'id' => $investor->getId(),
@@ -69,13 +67,12 @@ class InvestorsController extends AbstractController
     #[Route('/Investors/{id}/patch', name: 'app_investors_update', methods: ['PATCH'])]
     public function update(
         InvestorsRepository $investorRepository,
-        Investors $investor, Request $request,
+        Investors $investor,
+        Request $request,
         EntityManagerInterface $entityManager,
         TokenStorageInterface $tokenStorage,
         ResponseError $responseError
-        ): JsonResponse
-
-    {
+    ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -128,7 +125,7 @@ class InvestorsController extends AbstractController
         }
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-        
+
         $data = json_decode($request->getContent(), true);
 
         $investor = new Investors();
@@ -178,4 +175,20 @@ class InvestorsController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+
+
+    // #[Route('/Investors/{id}/delete', name: 'delete_investor', methods: ['DELETE'])]
+    // public function deleteInvestor(int $id, EntityManagerInterface $entityManager,  InvestorsRepository $investorRepository,TokenStorageInterface $tokenStorage, Investors $investor): JsonResponse
+    // {
+    //     // $token = $tokenStorage->getToken();
+    //     $investor = $investorRepository->find($id);
+
+    //     if (!$investor) {
+    //         throw $this->createNotFoundException('Investor not found');
+    //     }
+    //     $entityManager->remove($investor);
+    //     $entityManager->flush();
+
+    //     return new JsonResponse(['status' => 'Investor deleted'], 200);
+    // }
 }

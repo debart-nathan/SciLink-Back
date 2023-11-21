@@ -75,11 +75,13 @@ class ConnectionController extends AbstractController
 
         if (
             preg_match(
+
                 "/[<>\/{};\/\.\\\?:\=\+\*\(\)$%\^&@#!\[\]|]/",
                 $data['first_name']
             ) ||
             preg_match(
                 "/[<>\/{};\/\.\\\?:\=\+\*\(\)$%\^&@#!\[\]|]/",
+
                 $data['last_name']
             )
         ) {
