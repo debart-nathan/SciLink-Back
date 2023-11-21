@@ -2,19 +2,30 @@
 
 namespace App\Controller;
 
-use App\Entity\RelationStatus;
 use App\Entity\Users;
+use App\Entity\RelationStatus;
+use App\Service\ResponseError;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RelationStatusRepository;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class RelationStatusController extends AbstractController
 {
+    private $authorizationChecker;
+    private $tokenStorage;
+    public function __construct(
+        AuthorizationCheckerInterface $authorizationChecker,
+        TokenStorageInterface $tokenStorage
+    ) {
+        $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage = $tokenStorage;
+    }
     #[Route('/RelationStatus', name: 'app_relation_status', methods: ['GET'])]
     public function index(
         RelationStatusRepository $relationStatusRepository,
@@ -59,14 +70,15 @@ class RelationStatusController extends AbstractController
         RelationStatus $relationStatus,
         Request $request,
         EntityManagerInterface $entityManager,
+        ResponseError $responseError,
         TokenStorageInterface $tokenStorage
     ): JsonResponse {
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
-        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
-        if (!($token && ($loginUser->getId() === $relationStatus->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+        // Check if the user is an admin
+        if (!in_array('ROLE_ADMIN', $loginUser->getRoles())) {
+            return new JsonResponse($responseError);
         }
 
         $data = json_decode($request->getContent(), true);
@@ -79,6 +91,52 @@ class RelationStatusController extends AbstractController
         $relationStatusJson = json_encode($relationStatus);
         return new JsonResponse($relationStatusJson, 200, [], true);
     }
+
+    #[Route('/RelationStatus/create/post', name: 'app_relation_status_create', methods: ['POST'])]
+    public function create(
+        RelationStatusRepository $relationStatusRepository,
+        RelationStatus $relationStatus,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ResponseError $responseError,
+        TokenStorageInterface $tokenStorage
+    ): JsonResponse {
+        $token = $tokenStorage->getToken();
+        /** @var Users $loginUser */
+        $loginUser = $token->getUser();
+        // Check if the user is an admin
+        if (!in_array('ROLE_ADMIN', $loginUser->getRoles())) {
+            return new JsonResponse($responseError);
+        }
+
+        // Créer un nouvel objet RelationStatus
+        $relationStatus = new RelationStatus();
+
+        // Récupérer les données de la requête
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifier les données nécessaires
+        if (!isset($data['status'])) {
+            return new JsonResponse(['error' => 'Le champ status est requis.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Attribuer les données à l'objet RelationStatus
+        $relationStatus->setStatus($data['status']);
+
+        // Ajouter le nouvel objet à la base de données
+        $entityManager->persist($relationStatus);
+        $entityManager->flush();
+
+        // Retourner la réponse JSON avec les détails du nouvel objet créé
+        $relationStatusArray = [
+            'id' => $relationStatus->getId(),
+            'status' => $relationStatus->getStatus(),
+        ];
+
+        $relationStatusJson = json_encode($relationStatusArray);
+
+        return new JsonResponse($relationStatusJson, Response::HTTP_CREATED, [], true);
+
     #[Route('/RelationStatus/{id}/delete', name: 'delete_relationStatus', methods: ['DELETE'])]
     public function deleteRelationStatus(int $id, EntityManagerInterface $entityManager, RelationStatusRepository $relationSttusRepository, RelationStatus $relationStatus): JsonResponse
     {
@@ -92,5 +150,6 @@ class RelationStatusController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['status' => 'RelationStatus deleted'], 200);
+
     }
 }

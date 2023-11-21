@@ -21,14 +21,15 @@ class Contacts
     private ?string $object = null;
 
     #[ORM\ManyToOne(inversedBy: 'contacts_send')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Users $app_user_send = null;
 
     #[ORM\ManyToOne(inversedBy: 'contacts_receive')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false,onDelete: 'CASCADE')]
     private ?Users $app_user_receive = null;
 
     #[ORM\ManyToOne(inversedBy: 'contacts')]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?RelationStatus $relationStatus = null;
 
     public function getId(): ?int

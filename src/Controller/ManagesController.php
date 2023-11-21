@@ -104,15 +104,18 @@ class ManagesController extends AbstractController
         return new JsonResponse($manageJson, 200, [], true);
     }
 
-    #[Route('/Manages', name: 'app_manages_create', methods: ['POST'])]
-    public function create(
+    #[Route('/Manages/create/post', name: 'app_manages_create', methods: ['POST'])]
+    public function create(// TODO : 
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
-    ): JsonResponse {
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
+    ): JsonResponse
+    {
+
         $token = $tokenStorage->getToken();
         if (!$token) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
@@ -127,8 +130,9 @@ class ManagesController extends AbstractController
         $manage->setPersonnel($data['personnel_id']);
         $manage->setResearchCenter($data['research_center_id']);
 
-        if (!$loginUser->getId() === $manage->getResearchCenter()->getId()) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+         if (!$loginUser->getId() === $manage->getResearchCenter()->getId()) {
+            return new JsonResponse($responseError);
+
         }
 
         $entityManager->persist($manage);

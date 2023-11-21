@@ -2,16 +2,17 @@
 
 namespace App\Controller;
 
-use App\Entity\Locations;
 use App\Entity\Users;
+use App\Entity\Locations;
+use App\Service\ResponseError;
 use App\Repository\LocationsRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 class LocationsController extends AbstractController
 {
@@ -61,15 +62,18 @@ class LocationsController extends AbstractController
         Locations $locations,
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
-    ): JsonResponse {
+
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
+        ): JsonResponse
+    {
 
         $token = $tokenStorage->getToken();
         /** @var Users $loginUser */
         $loginUser = $token->getUser();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!($token && ($loginUser->getId() === $locations->getId()))) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse($responseError);
         }
 
         $data = json_decode($request->getContent(), true);
@@ -121,17 +125,22 @@ class LocationsController extends AbstractController
 
         return new JsonResponse(['status' => 'Method not allowed'], 405);
     }
-    #[Route('/locations/create', name: 'app_locations_create', methods: ['POST'])]
+    #[Route('/locations/create/post', name: 'app_locations_create', methods: ['POST'])]
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage
-    ): JsonResponse {
+
+        TokenStorageInterface $tokenStorage,
+        ResponseError $responseError
+    ): JsonResponse
+    {
+
         //récupérer le jeton d'authentification de l'utilisateur connecté
         $token = $tokenStorage->getToken();
         // vérifie que l'utilisateur connecté est l'utilisateur de la donné
         if (!$token) {
-            return new JsonResponse(['error' => 'Accès refusé'], Response::HTTP_UNAUTHORIZED); //code HTTP 401 
+            return new JsonResponse($responseError);//code HTTP 401
+
         }
 
         $data = json_decode($request->getContent(), true);

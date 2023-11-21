@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Domains;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\DomainsRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\LocationsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -48,6 +49,33 @@ class DomainsController extends AbstractController
         return new JsonResponse($domainsJson, 200, [], true);
     }
 
+    #[Route('/Domains/create/post', name: 'app_domains_create', methods: ['POST'])]
+    public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // Validate that the required data is present
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Create a new Domains entity
+        $domain = new Domains();
+        $domain->setName($data['name']);
+
+        // Persist the new entity to the database
+        $entityManager->persist($domain);
+        $entityManager->flush();
+
+        // Return the newly created domain in the response
+        $domainArray = [
+            'id' => $domain->getId(),
+            'name' => $domain->getName(),
+        ];
+        $domainJson = json_encode($domainArray);
+
+        return new JsonResponse($domainJson, JsonResponse::HTTP_CREATED, [], true);
+
 
     #[Route('/Domains/{id}/delete', name: 'delete_domain', methods: ['DELETE'])]
     public function deleteDomain(int $id, EntityManagerInterface $entityManager, DomainsRepository $domainsRepository, Domains $domain): JsonResponse
@@ -62,5 +90,6 @@ class DomainsController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['status' => 'Domain deleted'], 200);
+
     }
 }

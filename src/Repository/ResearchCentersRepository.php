@@ -21,7 +21,7 @@ class ResearchCentersRepository extends ServiceEntityRepository
         parent::__construct($registry, ResearchCenters::class);
     }
 
-    public function search($search, $additionalData)
+    public function search($search, $additionalData, $offset = 0, $limit = 10)
     {
         $queryBuilder = $this->createQueryBuilder('rc');
 
@@ -31,8 +31,9 @@ class ResearchCentersRepository extends ServiceEntityRepository
         }
 
         if (!empty($additionalData['is_active'])) {
+            $is_active = $additionalData['is_active'] === 'true' ? 1 : 0;
             $queryBuilder->andWhere('rc.is_active = :isActive')
-                ->setParameter('isActive', $additionalData['is_active']);
+                ->setParameter('isActive', $is_active);
         }
 
         if (!empty($additionalData['domain'])) {
@@ -51,6 +52,9 @@ class ResearchCentersRepository extends ServiceEntityRepository
             $queryBuilder->andWhere('rc.founding_year <= :dateEnd')
                 ->setParameter('dateEnd', $additionalData['date_end']);
         }
+
+        $queryBuilder->setFirstResult($offset)
+        ->setMaxResults($limit);
 
         return $queryBuilder->getQuery()->getResult();
     }

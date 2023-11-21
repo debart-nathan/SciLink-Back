@@ -21,7 +21,7 @@ class ResearchersRepository extends ServiceEntityRepository
         parent::__construct($registry, Researchers::class);
     }
 
-    public function search($search, $additionalData)
+    public function search($search, $additionalData, $offset = 0, $limit = 10)
     {
         $queryBuilder = $this->createQueryBuilder('r');
         if ($search) {
@@ -37,6 +37,9 @@ class ResearchersRepository extends ServiceEntityRepository
                 ->andWhere('d.id = :domainId')
                 ->setParameter('domainId', $additionalData['domain']);
         }
+
+        $queryBuilder->setFirstResult($offset)
+        ->setMaxResults($limit);
 
         return $queryBuilder->getQuery()->getResult();
     }

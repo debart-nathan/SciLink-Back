@@ -67,12 +67,17 @@ class UsersController extends AbstractController
     }
 
     #[Route('/Users/{id}', name: 'app_users_show', methods: ['GET'])]
-
     public function show(
         ContactVoter $contactVoter,
         TokenStorageInterface $tokenStorage,
-        Users $user
+        UsersRepository $usersRepository,
+        int $id
     ): JsonResponse {
+        $user = $usersRepository->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
         $token = $tokenStorage->getToken();
         $privacySecurity = false;
         if ($token) {
