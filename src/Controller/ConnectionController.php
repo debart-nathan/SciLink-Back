@@ -168,33 +168,31 @@ class ConnectionController extends AbstractController
         // cette route doit exister mais elle est géré automatiquement
     }
 
-    #[Route('/is-logged-in', name: 'app_is_logged_in', methods: ['GET'])]
-    public function isLoggedIn(TokenStorageInterface $tokenStorage): JsonResponse
-    {
-        $token = $tokenStorage->getToken();
-        if (!$token) {
-            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
-        }
-        return new JsonResponse(['status' => 'Logged in'], Response::HTTP_OK);
-    }
-
     #[Route('/is-admin', name: 'app_is_admin', methods: ['GET'])]
     public function isAdmin(TokenStorageInterface $tokenStorage): JsonResponse
     {
         $token = $tokenStorage->getToken();
         if (!$token) {
-            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
 
         /** @var Users $loggedInUser */
         $loggedInUser = $token->getUser();
 
         if (!in_array('ROLE_ADMIN', $loggedInUser->getRoles())) {
-            return new JsonResponse(['error' => 'Not an admin'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
-        return new JsonResponse(['status' => 'Is an admin'], Response::HTTP_OK);
+        return new JsonResponse(['value' => true], Response::HTTP_OK);
     }
-
+    #[Route('/is-logged-in', name: 'app_is_logged_in', methods: ['GET'])]
+    public function isLoggedIn(TokenStorageInterface $tokenStorage): JsonResponse
+    {
+        $token = $tokenStorage->getToken();
+        if (!$token) {
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
+        }
+        return new JsonResponse(['value' => true], Response::HTTP_OK);
+    }
     #[Route('/is-friend/{id}', name: 'app_is_friend', methods: ['GET'])]
     public function isFriend(
         ContactVoter $contactVoter,
@@ -205,20 +203,19 @@ class ConnectionController extends AbstractController
         $user = $usersRepository->find($id);
 
         if (!$user) {
-            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
 
         $token = $tokenStorage->getToken();
         if (!$token) {
-            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
 
         if (!$contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)) {
-            return new JsonResponse(['error' => 'Not friends'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
-        return new JsonResponse(['status' => 'Is friends'], Response::HTTP_OK);
+        return new JsonResponse(['value' => true], Response::HTTP_OK);
     }
-
 
     #[Route('/is-connected-users', name: 'app_is_connected_users', methods: ['POST'])]
     public function isConnectedUsers(Request $request, TokenStorageInterface $tokenStorage): JsonResponse
@@ -228,7 +225,7 @@ class ConnectionController extends AbstractController
 
         $token = $tokenStorage->getToken();
         if (!$token) {
-            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
 
         /** @var Users $loggedInUser */
@@ -237,29 +234,29 @@ class ConnectionController extends AbstractController
 
         foreach ($userIds as $userId) {
             if ($loggedInUserId === $userId) {
-                return new JsonResponse(['status' => 'ok'], Response::HTTP_OK);
+                return new JsonResponse(['value' => true], Response::HTTP_OK);
             }
         }
 
-        return new JsonResponse(['error' => 'Not the connected user'], Response::HTTP_FORBIDDEN);
+        return new JsonResponse(['value' => false], Response::HTTP_OK);
     }
-    
+
     #[Route('/is-connected-user/{id}', name: 'app_is_connected_user', methods: ['GET'])]
     public function isConnectedUser(TokenStorageInterface $tokenStorage, int $id): JsonResponse
     {
         $token = $tokenStorage->getToken();
         if (!$token) {
-            return new JsonResponse(['error' => 'Not logged in'], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
 
         /** @var Users $loggedInUser */
         $loggedInUser = $token->getUser();
 
         if ($loggedInUser->getId() !== $id) {
-            return new JsonResponse(['error' => 'Not the connected user'], Response::HTTP_FORBIDDEN);
+            return new JsonResponse(['value' => false], Response::HTTP_OK);
         }
 
-        return new JsonResponse(['status' => 'Is the connected user'], Response::HTTP_OK);
+        return new JsonResponse(['value' => true], Response::HTTP_OK);
     }
 
     #[Route('/Users/connected', name: 'app_connected_user_id', methods: ['GET'])]
