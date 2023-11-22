@@ -52,7 +52,16 @@ class SearchController extends AbstractController
         // Calculate the offset based on the page number and limit
         $offset = ($page - 1) * $limit;
         $results = [];
-
+        $totalCount = 0;
+        
+        // Implement this method in your repository
+        $totalCountInvestor = $this->investorsRepository
+        ->getTotalCount($search, $data['investor'] ?? []);
+        $totalCountResearchCenter = $this->researchCentersRepository
+        ->getTotalCount($search, $data['research-center'] ?? []);
+        $totalCountSearcher = $this->researchersRepository
+        ->getTotalCount($search, $data['searcher'] ?? []);
+        $totalCount = $totalCountSearcher + $totalCountResearchCenter + $totalCountInvestor;
 
         if ($category) {
             switch ($category) {
@@ -119,7 +128,6 @@ class SearchController extends AbstractController
             );
         }
 
-
         usort($results, function ($a, $b) {
             return $b['score'] - $a['score'];
         });
@@ -130,7 +138,14 @@ class SearchController extends AbstractController
             unset($item['score']);
         });
 
-        return $this->json($results);
+        return $this->json([
+            'results' => $results,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $totalCount, // You may need to adjust this based on the total number of results
+            ],
+        ]);
     }
 
     private function searchAndWrap($repository, $search, $additionalData, $category, $offset, $limit)
@@ -171,13 +186,13 @@ class SearchController extends AbstractController
         switch ($category) {
             case 'searcher':
                 $token = $this->tokenStorage->getToken();
-                $privacySecurity=false;
+                $privacySecurity = false;
                 $user = $object->getUser();
                 if ($token) {
                     /** @var Users $loginUser */
                     $loginUser = $token->getUser();
                     $privacySecurity = (
-                        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                            // vérifie que l'utilisateur connecté est l'utilisateur de la donné
                         (($loginUser->getId() === $user->getId())) ||
                         // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                         $this->contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)
@@ -185,7 +200,7 @@ class SearchController extends AbstractController
                     );
                 }
                 return [
-                    "profil"=>[
+                    "profil" => [
                         "id" => $object->getId(),
                     ],
                     "user" => [
@@ -193,7 +208,7 @@ class SearchController extends AbstractController
                         'user_name' => $user->getUserName(),
                         'first_name' => $user->getFirstName(),
                         'last_name' => $user->getLastName(),
-                        'email' =>  $privacySecurity ? $user->getEmail() : null,
+                        'email' => $privacySecurity ? $user->getEmail() : null,
                     ]
                 ];
             case 'research-center':
