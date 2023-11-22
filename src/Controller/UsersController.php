@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\ResearchCenters;
 use App\Entity\Users;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UsersRepository;
@@ -49,7 +50,11 @@ class UsersController extends AbstractController
 
                 $locationPrivacy = (($loginUser->getId() === $user->getId()) && $user->getLocation());
             }
-
+            $researchCenters = $user->getResearchCenters();
+            $researchCentersArray = [];
+            foreach ($researchCenters as $researchCenter) {
+                $researchCentersArray[] = $researchCenter->getId();
+            }
 
 
             $usersArray[] = [
@@ -59,6 +64,7 @@ class UsersController extends AbstractController
                 'last_name' => $user->getLastName(),
                 'email' => $privacySecurity ? $user->getEmail() : null,
                 'location_id' => $locationPrivacy ? $user->getLocation()->getId() : null,
+                'research_centers' => $researchCentersArray
 
             ];
         }
@@ -91,6 +97,11 @@ class UsersController extends AbstractController
 
             );
         }
+        $researchCenters = $user->getResearchCenters();
+            $researchCentersArray = [];
+            foreach ($researchCenters as $researchCenter) {
+                $researchCentersArray[] = $researchCenter->getId();
+            }
         $userArray = [
             'id' => $user->getId(),
             'user_name' => $user->getUserName(),
@@ -98,6 +109,7 @@ class UsersController extends AbstractController
             'last_name' => $user->getLastName(),
             'email' => $privacySecurity ? $user->getEmail() : null,
             'location_id' => $user->getLocation() ? $user->getLocation()->getId() : null,
+            'research_centers' => $researchCentersArray
         ];
 
         $userJson = json_encode($userArray);
