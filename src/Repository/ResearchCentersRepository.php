@@ -23,14 +23,6 @@ class ResearchCentersRepository extends ServiceEntityRepository
 
     private function getQueryBuilder($search, $additionalData, $qb)
     {
-        if ($search) {
-            $qb->join('r.app_user', 'u')
-                ->where('LOWER(rc.libelle) LIKE :search')
-                ->orWhere('LOWER(rc.sigle) LIKE :search')
-                ->setParameter('search', '%' . strtolower($search) . '%');
-        }
-
-        // Ajoutez ici d'autres conditions en fonction de $additionalData
         if (!empty($search)) {
             $qb->andWhere('LOWER(rc.libelle) LIKE :search OR LOWER(rc.sigle) LIKE :search')
                 ->setParameter('search', '%' . strtolower($search) . '%');
@@ -64,7 +56,7 @@ class ResearchCentersRepository extends ServiceEntityRepository
     {
         $queryBuilder = $this->createQueryBuilder('rc');
         $queryBuilder = $this->getQueryBuilder($search, $additionalData, $queryBuilder);
-        
+
 
         $queryBuilder->setFirstResult($offset)
             ->setMaxResults($limit);
@@ -74,12 +66,12 @@ class ResearchCentersRepository extends ServiceEntityRepository
     public function getTotalCount($search, $additionalData)
     {
         // Utilisez la même logique de recherche, mais sans limit et offset
-        $qb = $this->createQueryBuilder('r');
+        $qb = $this->createQueryBuilder('rc');
 
         $qb = $this->getQueryBuilder($search, $additionalData, $qb);
 
         // Retourne le nombre total d'éléments correspondant à la recherche
-        return (int) $qb->select('COUNT(r.id)')
+        return (int) $qb->select('COUNT(rc.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }

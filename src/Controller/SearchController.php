@@ -53,15 +53,15 @@ class SearchController extends AbstractController
         $offset = ($page - 1) * $limit;
         $results = [];
         $totalCount = 0;
-        
+
         // Implement this method in your repository
         $totalCountInvestor = $this->investorsRepository
-        ->getTotalCount($search, $data['investor'] ?? []);
+            ->getTotalCount($search, $data['investor'] ?? []);
         $totalCountResearchCenter = $this->researchCentersRepository
-        ->getTotalCount($search, $data['research-center'] ?? []);
+            ->getTotalCount($search, $data['research-center'] ?? []);
         $totalCountSearcher = $this->researchersRepository
-        ->getTotalCount($search, $data['searcher'] ?? []);
-        $totalCount = $totalCountSearcher + $totalCountResearchCenter + $totalCountInvestor;
+            ->getTotalCount($search, $data['searcher'] ?? []);
+        $totalCount =  0;
 
         if ($category) {
             switch ($category) {
@@ -75,6 +75,7 @@ class SearchController extends AbstractController
                         $limit
 
                     );
+                    $totalCount = $totalCountSearcher;
                     break;
                 case 'research-center':
                     $results = $this->searchAndWrap(
@@ -86,6 +87,7 @@ class SearchController extends AbstractController
                         $limit
 
                     );
+                    $totalCount = $totalCountResearchCenter;
                     break;
                 case 'investor':
                     $results = $this->searchAndWrap(
@@ -96,6 +98,7 @@ class SearchController extends AbstractController
                         $offset,
                         $limit
                     );
+                    $totalCount =  $totalCountInvestor;
                     break;
             }
         } else {
@@ -126,6 +129,7 @@ class SearchController extends AbstractController
                     $limit
                 )
             );
+            $totalCount = $totalCountSearcher + $totalCountResearchCenter + $totalCountInvestor;
         }
 
         usort($results, function ($a, $b) {
@@ -143,7 +147,7 @@ class SearchController extends AbstractController
             'pagination' => [
                 'page' => $page,
                 'limit' => $limit,
-                'total' => $totalCount, // You may need to adjust this based on the total number of results
+                'total' => $totalCount,
             ],
         ]);
     }
@@ -192,7 +196,7 @@ class SearchController extends AbstractController
                     /** @var Users $loginUser */
                     $loginUser = $token->getUser();
                     $privacySecurity = (
-                            // vérifie que l'utilisateur connecté est l'utilisateur de la donné
+                        // vérifie que l'utilisateur connecté est l'utilisateur de la donné
                         (($loginUser->getId() === $user->getId())) ||
                         // vérifie que l'utilisateur connecté a une relation accepté avec l’utilisateur de la donné
                         $this->contactVoter->voteOnAttribute('HAS_ACCEPTED_CONTACT', $user, $token)

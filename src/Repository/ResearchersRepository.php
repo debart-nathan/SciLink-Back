@@ -30,7 +30,6 @@ class ResearchersRepository extends ServiceEntityRepository
                 ->setParameter('search', '%' . strtolower($search) . '%');
         }
 
-        // Ajoutez ici d'autres conditions en fonction de $additionalData
         if (!empty($additionalData['domain'])) {
             $qb->innerJoin('r.domains', 'd')
                 ->andWhere('d.id = :domainId')

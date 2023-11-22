@@ -23,21 +23,18 @@ class InvestorsRepository extends ServiceEntityRepository
 
     private function getQueryBuilder($search, $additionalData, $qb)
     {
-        if ($search) {
-            $qb->join('r.app_user', 'u')
-                ->where('LOWER(i.name) LIKE :search')
-                ->orWhere('LOWER(i.sigle) LIKE :search')
-                ->setParameter('search', '%' . strtolower($search) . '%');
+        $qb->where($qb->expr()->orX(
+            $qb->expr()->like('LOWER(i.name)', ':search'),
+            $qb->expr()->like('LOWER(i.sigle)', ':search')
+        ))
+            ->setParameter('search', '%' . strtolower($search) . '%');
+        /* TODO V2 Choisir si on veut domaine ou pas
+        if (!empty($additionalData['domain'])) {
+            $qb->join('i.domains', 'd')
+                ->andWhere('d.id = :domainId')
+                ->setParameter('domainId', $additionalData['domain']);
         }
-
-        // Ajoutez ici d'autres conditions en fonction de $additionalData
-       if (!empty($additionalData['some_condition'])) {
-           // Add code here for the condition based on $additionalData['some_condition']
-       }
-
-       if (!empty($additionalData['another_condition'])) {
-           // Add code here for the condition based on $additionalData['another_condition']
-       }
+        */
 
        // Add more conditions based on $additionalData as needed
         return $qb;
@@ -48,13 +45,6 @@ class InvestorsRepository extends ServiceEntityRepository
         $queryBuilder = $this->createQueryBuilder('i');
 
         $queryBuilder = $this->getQueryBuilder($search, $additionalData, $queryBuilder);
-        /* TODO pour la V2   Choisir si on veut domaine ou pas
-        if (!empty($additionalData['domain'])) {
-            $qb->join('i.domains', 'd')
-                ->andWhere('d.id = :domainId')
-                ->setParameter('domainId', $additionalData['domain']);
-        }
-        */
 
         $queryBuilder->setFirstResult($offset)
             ->setMaxResults($limit);
@@ -63,13 +53,13 @@ class InvestorsRepository extends ServiceEntityRepository
     public function getTotalCount($search, $additionalData)
     {
         // Utilisez la même logique de recherche, mais sans limit et offset
-        $qb = $this->createQueryBuilder('r');
+        $qb = $this->createQueryBuilder('i');
 
         // Ajoutez ici vos conditions de recherche, par exemple
         $qb = $this->getQueryBuilder($search, $additionalData, $qb);
 
         // Retourne le nombre total d'éléments correspondant à la recherche
-        return (int) $qb->select('COUNT(r.id)')
+        return (int) $qb->select('COUNT(i.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }
