@@ -21,7 +21,8 @@ class ResearchersRepository extends ServiceEntityRepository
         parent::__construct($registry, Researchers::class);
     }
 
-    private function getQueryBuilder($search, $additionalData, $qb){
+    private function getQueryBuilder($search, $additionalData, $qb)
+    {
         if ($search) {
             $qb->join('r.app_user', 'u')
                 ->where('LOWER(u.user_name) LIKE :search')
@@ -40,14 +41,14 @@ class ResearchersRepository extends ServiceEntityRepository
     public function search($search, $additionalData, $offset = 0, $limit = 10)
     {
         $queryBuilder = $this->createQueryBuilder('r');
-        $queryBuilder= $this->getQueryBuilder($search, $additionalData, $queryBuilder);
+        $queryBuilder = $this->getQueryBuilder($search, $additionalData, $queryBuilder);
 
         $queryBuilder->setFirstResult($offset)
-        ->setMaxResults($limit);
+            ->setMaxResults($limit);
 
         return $queryBuilder->getQuery()->getResult();
     }
-    public function getTotalCount($search,  $additionalData, )
+    public function getTotalCount($search,  $additionalData,)
     {
         // Utilisez la même logique de recherche, mais sans limit et offset
         $qb = $this->createQueryBuilder('r');
@@ -56,7 +57,7 @@ class ResearchersRepository extends ServiceEntityRepository
         $qb = $this->getQueryBuilder($search, $additionalData, $qb);
 
         // Retourne le nombre total d'éléments correspondant à la recherche
-        return (int) $qb->select('COUNT(r.id)')
+        return (int) $qb->select('COUNT(DISTINCT r.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }

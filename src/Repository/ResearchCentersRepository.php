@@ -55,6 +55,7 @@ class ResearchCentersRepository extends ServiceEntityRepository
     public function search($search, $additionalData, $offset = 0, $limit = 10)
     {
         $queryBuilder = $this->createQueryBuilder('rc');
+        $queryBuilder = $this->createQueryBuilder('r');
         $queryBuilder = $this->getQueryBuilder($search, $additionalData, $queryBuilder);
 
 
@@ -71,7 +72,7 @@ class ResearchCentersRepository extends ServiceEntityRepository
         $qb = $this->getQueryBuilder($search, $additionalData, $qb);
 
         // Retourne le nombre total d'éléments correspondant à la recherche
-        return (int) $qb->select('COUNT(rc.id)')
+        return (int) $qb->select('COUNT(DISTINCT rc.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }

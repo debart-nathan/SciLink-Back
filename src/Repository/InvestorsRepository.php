@@ -59,7 +59,7 @@ class InvestorsRepository extends ServiceEntityRepository
         $qb = $this->getQueryBuilder($search, $additionalData, $qb);
 
         // Retourne le nombre total d'éléments correspondant à la recherche
-        return (int) $qb->select('COUNT(i.id)')
+        return (int) $qb->select('COUNT(DISTINCT i.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }

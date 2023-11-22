@@ -102,6 +102,21 @@ class SearchController extends AbstractController
                     break;
             }
         } else {
+            $offsetRemaining = $offset;
+            $limitRemaining = $limit;
+
+            $offsetResearchers = min($totalCountSearcher, intdiv($offsetRemaining, 3));
+            $offsetRemaining -= $offsetResearchers;
+            $limitResearchers = min($totalCountSearcher - $offsetResearchers, intdiv($limitRemaining, 3));
+            $limitRemaining -= $limitResearchers;
+
+            $offsetResearchCenter = min($totalCountResearchCenter, intdiv($offsetRemaining, 2));
+            $offsetRemaining -= $offsetResearchCenter;
+            $limitResearchCenter = min($totalCountResearchCenter - $offsetResearchCenter, intdiv($limitRemaining, 2));
+            $limitRemaining -= $limitResearchCenter;
+
+            $offsetInvestor = min($totalCountInvestor, $offsetRemaining);
+            $limitInvestor = min($totalCountInvestor - $offsetInvestor, $limitRemaining);
 
             $results = array_merge(
                 $this->searchAndWrap(
@@ -109,38 +124,30 @@ class SearchController extends AbstractController
                     $search,
                     $data['searcher'] ?? [],
                     'searcher',
-                    $offset,
-                    $limit
+                    $offsetResearchers,
+                    $limitResearchers
                 ),
                 $this->searchAndWrap(
                     $this->researchCentersRepository,
                     $search,
                     $data['research-center'] ?? [],
                     'research-center',
-                    $offset,
-                    $limit
+                    $offsetResearchCenter,
+                    $limitResearchCenter
                 ),
                 $this->searchAndWrap(
                     $this->investorsRepository,
                     $search,
                     $data['investor'] ?? [],
                     'investor',
-                    $offset,
-                    $limit
+                    $offsetInvestor,
+                    $limitInvestor
                 )
             );
             $totalCount = $totalCountSearcher + $totalCountResearchCenter + $totalCountInvestor;
         }
 
-        usort($results, function ($a, $b) {
-            return $b['score'] - $a['score'];
-        });
-        $results = array_slice($results, 0, $limit);
 
-        // Remove the score from the results before returning
-        array_walk($results, function (&$item) {
-            unset($item['score']);
-        });
 
         return $this->json([
             'results' => $results,
@@ -158,26 +165,13 @@ class SearchController extends AbstractController
         $results = $repository->search($search, $additionalData, $offset, $limit);
         $wrappedResults = [];
 
-        // Define the fields to be tested for each category
-        $fieldsToTest = [];
-        switch ($category) {
-            case 'searcher':
-                $fieldsToTest = ['user.user_name', 'user.first_name', 'user.last_name'];
-                break;
-            case 'research-center':
-                $fieldsToTest = ['libelle', 'sigle'];
-                break;
-            case 'investor':
-                $fieldsToTest = ['name', 'sigle'];
-                break;
-        }
+
 
         foreach ($results as $result) {
-            $score = $this->calculateScore($result, $search, $fieldsToTest);
             $wrappedResults[] = [
                 'category' => $category,
                 'data' => $this->createDataArray($result, $category),
-                'score' => $score,
+
             ];
         }
 
@@ -236,48 +230,5 @@ class SearchController extends AbstractController
             default:
                 throw new \Exception("Unknown category: $category");
         }
-    }
-
-    private function calculateScore($item, $search, $fieldsToTest)
-    {
-        $maxScore = 0;
-
-
-        // Iterate over the specified fields
-        foreach ($fieldsToTest as $field) {
-            // Split the field string into parent and child parts
-            $parts = explode('.', $field);
-            $attribute = $item;
-            foreach ($parts as $part) {
-                $getter = 'get' . ucfirst($part);
-                if (method_exists($attribute, $getter)) {
-                    $attribute = $attribute->$getter();
-                } else {
-                    // If the getter doesn't exist, skip to the next field
-                    continue 2;
-                }
-            }
-
-            $score = 0;
-
-            // Check if the attribute value contains the search string
-            if ($attribute !== null && $search !== null && strpos($attribute, $search) !== false) {
-                // Calculate the proportion of the search string in the attribute value
-                $proportion = strlen($search) / strlen($attribute);
-                $score += $proportion;
-
-                // Give bonus points if the search string is at the beginning of the attribute value
-                if (strpos($attribute, $search) === 0) {
-                    $score += 0.1; // Adjust this value as needed
-                }
-            }
-
-            // Update maxScore if this field's score is higher
-            if ($score > $maxScore) {
-                $maxScore = $score;
-            }
-        }
-
-        return $maxScore;
     }
 }
