@@ -16,6 +16,7 @@ use App\Entity\Manages;
 use App\Entity\Investors;
 use App\Entity\Tutelles;
 use App\Entity\Domains;
+use App\Entity\RelationStatus;
 
 class InitDatabaseCommand extends Command
 {
@@ -65,6 +66,12 @@ class InitDatabaseCommand extends Command
 
         $output->writeln('');
         $output->writeln('Insertion des données dans la base de données terminée.');
+
+        $output->writeln('insersion des fixtures');
+
+        $this->insertRelationStatuses();
+
+        $output->writeln('insersion des fixtures terminée');
 
         return Command::SUCCESS;
     }
@@ -247,32 +254,32 @@ class InitDatabaseCommand extends Command
         if ($cacheOption === 'cache') {
             // existing caching logic
             $cacheKey = $entityClass . ':' . http_build_query($criteria);
-    
+
             // Check if the entity is in the cache
             if (isset($this->entitiesCache[$cacheKey])) {
                 $entity = $this->entitiesCache[$cacheKey];
             } else {
                 // If the entity is not in the cache, get it from the database
                 $entity = $this->entityManager->getRepository($entityClass)->findOneBy($criteria);
-    
+
                 // If the entity does not exist in the database, create a new one
                 if (!$entity) {
                     $entity = new $entityClass();
                 }
-    
+
                 // Store the entity in the cache
                 $this->entitiesCache[$cacheKey] = $entity;
             }
         } else {
             // logic without caching
             $entity = $this->entityManager->getRepository($entityClass)->findOneBy($criteria);
-    
+
             // If the entity does not exist in the database, create a new one
             if (!$entity) {
                 $entity = new $entityClass();
             }
         }
-    
+
         foreach ($data as $property => $value) {
             $property = lcfirst(str_replace('_', '', ucwords($property, '_')));
             $setter = 'set' . ucfirst($property);
@@ -280,14 +287,31 @@ class InitDatabaseCommand extends Command
                 $entity->$setter($value);
             }
         }
-    
+
         $this->entityManager->persist($entity);
-    
+
         // Flush the entity manager if cache is not used
         if ($cacheOption !== 'cache') {
             $this->entityManager->flush();
         }
-    
+
         return $entity;
+    }
+
+    private function insertRelationStatuses()
+    {
+        $statuses = ['accepted', 'pending'];
+
+        foreach ($statuses as $statusName) {
+            $status = $this->entityManager->getRepository(RelationStatus::class)->findOneBy(['status' => $statusName]);
+
+            if (!$status) {
+                $status = new RelationStatus();
+                $status->setStatus($statusName);
+                $this->entityManager->persist($status);
+            }
+        }
+
+        $this->entityManager->flush();
     }
 }
