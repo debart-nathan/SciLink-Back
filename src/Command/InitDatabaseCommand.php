@@ -37,7 +37,7 @@ class InitDatabaseCommand extends Command
         $this
             ->setDescription('Initialise la base de données avec des données pré-remplies.')
             ->setHelp('Cette commande vous permet de pré-remplir votre base de données...')
-            ->addArgument('cacheOption', InputArgument::OPTIONAL, 'Use cache for entities', 'cache');
+            ->addArgument('cacheOption', InputArgument::OPTIONAL, 'do not use cache for entities', 'no-cache');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -251,7 +251,7 @@ class InitDatabaseCommand extends Command
 
     private function handleEntity(string $entityClass, $criteria, array $data, string $cacheOption)
     {
-        if ($cacheOption === 'cache') {
+        if ($cacheOption !== 'no-cache') {
             // existing caching logic
             $cacheKey = $entityClass . ':' . http_build_query($criteria);
 
