@@ -21,28 +21,48 @@ class ResearchersRepository extends ServiceEntityRepository
         parent::__construct($registry, Researchers::class);
     }
 
-    public function search($search, $additionalData, $offset = 0, $limit = 10)
-    {
-        $queryBuilder = $this->createQueryBuilder('r');
+    private function getQueryBuilder($search, $additionalData, $qb){
         if ($search) {
-            $queryBuilder->join('r.app_user', 'u')
+            $qb->join('r.app_user', 'u')
                 ->where('LOWER(u.user_name) LIKE :search')
                 ->orWhere('LOWER(u.first_name) LIKE :search')
                 ->orWhere('LOWER(u.last_name) LIKE :search')
                 ->setParameter('search', '%' . strtolower($search) . '%');
         }
 
+        // Ajoutez ici d'autres conditions en fonction de $additionalData
         if (!empty($additionalData['domain'])) {
-            $queryBuilder->innerJoin('r.domains', 'd')
+            $qb->innerJoin('r.domains', 'd')
                 ->andWhere('d.id = :domainId')
                 ->setParameter('domainId', $additionalData['domain']);
         }
+        return $qb;
+    }
+    public function search($search, $additionalData, $offset = 0, $limit = 10)
+    {
+        $queryBuilder = $this->createQueryBuilder('r');
+        $queryBuilder= $this->getQueryBuilder($search, $additionalData, $queryBuilder);
 
         $queryBuilder->setFirstResult($offset)
         ->setMaxResults($limit);
 
         return $queryBuilder->getQuery()->getResult();
     }
+    public function getTotalCount($search,  $additionalData, )
+    {
+        // Utilisez la même logique de recherche, mais sans limit et offset
+        $qb = $this->createQueryBuilder('r');
+
+
+        $qb = $this->getQueryBuilder($search, $additionalData, $qb);
+
+        // Retourne le nombre total d'éléments correspondant à la recherche
+        return (int) $qb->select('COUNT(r.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+
     //    /**
     //     * @return Researchers[] Returns an array of Researchers objects
     //     */

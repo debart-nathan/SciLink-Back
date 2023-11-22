@@ -21,42 +21,67 @@ class ResearchCentersRepository extends ServiceEntityRepository
         parent::__construct($registry, ResearchCenters::class);
     }
 
-    public function search($search, $additionalData, $offset = 0, $limit = 10)
+    private function getQueryBuilder($search, $additionalData, $qb)
     {
-        $queryBuilder = $this->createQueryBuilder('rc');
+        if ($search) {
+            $qb->join('r.app_user', 'u')
+                ->where('LOWER(rc.libelle) LIKE :search')
+                ->orWhere('LOWER(rc.sigle) LIKE :search')
+                ->setParameter('search', '%' . strtolower($search) . '%');
+        }
 
+        // Ajoutez ici d'autres conditions en fonction de $additionalData
         if (!empty($search)) {
-            $queryBuilder->andWhere('LOWER(rc.libelle) LIKE :search OR LOWER(rc.sigle) LIKE :search')
+            $qb->andWhere('LOWER(rc.libelle) LIKE :search OR LOWER(rc.sigle) LIKE :search')
                 ->setParameter('search', '%' . strtolower($search) . '%');
         }
 
         if (!empty($additionalData['is_active'])) {
             $is_active = $additionalData['is_active'] === 'true' ? 1 : 0;
-            $queryBuilder->andWhere('rc.is_active = :isActive')
+            $qb->andWhere('rc.is_active = :isActive')
                 ->setParameter('isActive', $is_active);
         }
 
         if (!empty($additionalData['domain'])) {
-            $queryBuilder->innerJoin('rc.domains', 'd')
+            $qb->innerJoin('rc.domains', 'd')
                 ->andWhere('d.id = :domainId')
                 ->setParameter('domainId', $additionalData['domain']);
         }
 
 
         if (!empty($additionalData['date_start'])) {
-            $queryBuilder->andWhere('rc.founding_year >= :dateStart')
+            $qb->andWhere('rc.founding_year >= :dateStart')
                 ->setParameter('dateStart', $additionalData['date_start']);
         }
 
         if (!empty($additionalData['date_end'])) {
-            $queryBuilder->andWhere('rc.founding_year <= :dateEnd')
+            $qb->andWhere('rc.founding_year <= :dateEnd')
                 ->setParameter('dateEnd', $additionalData['date_end']);
         }
+        return $qb;
+    }
+    public function search($search, $additionalData, $offset = 0, $limit = 10)
+    {
+        $queryBuilder = $this->createQueryBuilder('rc');
+        $queryBuilder = $this->getQueryBuilder($search, $additionalData, $queryBuilder);
+        
 
         $queryBuilder->setFirstResult($offset)
-        ->setMaxResults($limit);
+            ->setMaxResults($limit);
 
         return $queryBuilder->getQuery()->getResult();
+    }
+    public function getTotalCount($search, $additionalData)
+    {
+        // Utilisez la même logique de recherche, mais sans limit et offset
+        $qb = $this->createQueryBuilder('r');
+
+        $qb = $this->getQueryBuilder($search, $additionalData, $qb);
+
+        // Retourne le nombre total d'éléments correspondant à la recherche
+        return (int) $qb->select('COUNT(r.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     //    /**
