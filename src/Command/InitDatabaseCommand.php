@@ -37,7 +37,7 @@ class InitDatabaseCommand extends Command
         $this
             ->setDescription('Initialise la base de données avec des données pré-remplies.')
             ->setHelp('Cette commande vous permet de pré-remplir votre base de données...')
-            ->addArgument('cacheOption', InputArgument::OPTIONAL, 'do not use cache for entities', 'no-cache');
+            ->addArgument('cacheOption', InputArgument::OPTIONAL, 'ne pas utiliser de cache pour les entité', 'no-cache');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
