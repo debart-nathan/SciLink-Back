@@ -291,7 +291,7 @@ class InitDatabaseCommand extends Command
         $this->entityManager->persist($entity);
 
         // Flush the entity manager if cache is not used
-        if ($cacheOption !== 'cache') {
+        if ($cacheOption === 'no-cache') {
             $this->entityManager->flush();
         }
 
